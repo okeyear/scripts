@@ -20,7 +20,6 @@ $xml.SelectSingleNode("Connections/Node[2]/Node[last()]")
 
 
 $xml.Save($xml)
- 
 
 
 
