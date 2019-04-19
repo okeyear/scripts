@@ -6,7 +6,8 @@ read -p "Please input the ServiePort(1-65535) you need speedup: " SelPort
 if [ $SelPort -gt 0 -a $SelPort -le 65535 ] ; then
   ServicePort=${SelPort}
 else
-  ServicePort=50000 # default port
+  ServicePort=50000 
+  # default port
 fi
 
 mkdir /etc/udp # store config file of tinymapper,udpspeeder,udp2raw
