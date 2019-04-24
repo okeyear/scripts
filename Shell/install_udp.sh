@@ -1,27 +1,53 @@
 #!/usr/bin/env bash
 # tinyPortMapper + udpspeeder + udp2raw
-# version 20190419
+# version 20190424
 #
-read -p "Please input the ServiePort(1-65535) you need speedup: " SelPort
-if [ $SelPort -gt 0 -a $SelPort -le 65535 ] ; then
-  ServicePort=${SelPort}
-else
-  ServicePort=50000 
-  # default port
-fi
+
 
 mkdir /etc/udp # store config file of tinymapper,udpspeeder,udp2raw
 cd /usr/local/src
 PublicIP=$(curl -s ifconfig.me)
 
-function Remove_soft(){
-  systemctl stop udp2raw
-  systemctl stop udpspeeder
-  systemctl stop tinymapper
-  rm -f /etc/udp/udp2raw_server.conf /usr/lib/systemd/system/{tinymapper,udpspeeder,udp2raw}@.service
+function Get_port(){
+while :
+do
+  read -p "Please input the ServiePort(1-65535) you need speedup: " SelPort
+  if [ $SelPort -gt 0 -a $SelPort -le 65535 ] ; then
+    ServicePort=${SelPort}
+    break
+  else
+    echo 'Wrong TCP/UDP port , please input it again.'
+  fi
+done
 }
 
-function Download_soft(){
+function Remove_soft(){
+  pkill udp2raw
+  pkill udpspeeder
+  pkill tinymapper
+  rm -rf /etc/udp /usr/lib/systemd/system/{tinymapper,udpspeeder,udp2raw}@.service
+}
+
+function Remove_port(){
+  Get_port
+  if [ $(ss -lan | awk "\$5 ~ /:${ServicePort}$/ {print \$1}"|grep -c udp) -eq 0 ] ; then
+    tinymapperPort=$(($ServicePort+1))
+    udpspeederPort=$(($tinymapperPort+1))
+    #udp2rawPort=$(($udpspeederPort+1))
+  else
+    tinymapperPort="$ServicePort"
+    udpspeederPort=$(($tinymapperPort+1))
+    #udp2rawPort=$(($udpspeederPort+1))
+  fi
+  
+  systemctl stop udp2raw@$udpspeederPort
+  systemctl stop udpspeeder\@$tinymapperPort
+  systemctl stop tinymapper\@$ServicePort
+  rm -f /etc/udp/{tinyPortMapper$ServicePort,udpspeeder$tinymapperPort,udp2raw$udpspeederPort}
+}
+
+
+function Install_soft(){
   #https://github.com/wangyu-/tinyPortMapper
   Url=$(curl -sk https://github.com/wangyu-/tinyPortMapper/releases/latest | grep -o 'https:[a-zA-Z0-9./-]*')
   winTinymapperUrl=$(echo $Url | sed 's@tag@download@;s@$@/tinymapper_windows.zip@')
@@ -64,7 +90,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 EnvironmentFile=-/etc/udp/tinyPortMapper%i
-ExecStart=/usr/bin/tinymapper_amd64 -l127.0.0.1:\$tinymapperPort -r 127.0.0.1:%i -u  #-t 
+ExecStart=/usr/bin/tinymapper_amd64 -l127.0.0.1:\$tinymapperPort -r 127.0.0.1:%i -u #-t 
 #PrivateTmp=true
 Restart=always
 RestartSec=5
@@ -76,7 +102,7 @@ EOF
   systemctl daemon-reload
 fi
 
-if [ $(ss -lan | awk "\$5 ~ /:${ServicePort}$/ {print \$1}"|grep -c udp) -eq 0  ] ; then
+if [ $(ss -lan | awk "\$5 ~ /:${ServicePort}$/ {print \$1}"|grep -c udp) -eq 0 ] ; then
   tinymapperPort=$(($ServicePort+1))
 cat > /etc/udp/tinyPortMapper$ServicePort <<EOF
 tinymapperPort=$(($ServicePort+1))
@@ -244,9 +270,34 @@ Auto download & install :
 EOF
 }
 
+cat <<EOF
+########################
+Only support CentOS 7 and later.
+1. install/add a udp port (to speedup)
+( auto install udpspeeder + udp2raw , and add port)
+(if tcp port , will install tinyPortMapper convert to udp port )
+2. remove a port (which speedup)
+3. remove software commplately (tinyPortMapper + udpspeeder + udp2raw) 
+########################
+EOF
+
+read -p "Please input your selection:" Sel
+case "$Sel" in
+  1)
+  Get_port
+  Download_soft
+  Config_soft
+  Config_client
+  ;;
+  2)
+  Remove_port
+  ;;
+  3)
+  Remove_soft
+  ;;
+  *)
+  echo 'Wrong Selction , please run it agian.'
+  ;;
+esac
 
 
-
-Download_soft
-Config_soft
-Config_client
