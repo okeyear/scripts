@@ -1,5 +1,6 @@
+
 #!/usr/bin/env bash
-# version: 20190419
+# version: 20190424
 source /etc/os-release
 [ $ID=="centos" -a $VERSION_ID -eq 7 ] && echo 'Your OS is CentOS7 , continue...' || exit
 PublicIP=$(curl -s ifconfig.me)
@@ -27,9 +28,9 @@ wg genkey | tee serverPrivateKey | wg pubkey > serverPublicKey # for Server
 wg genkey | tee clientPrivateKey | wg pubkey > clientPublicKey # for Client
 
 ip link add dev wg0 type wireguard
-ip address add dev wg0 10.10.10.1/24
+ip address add dev wg0 172.16.16.1/24
 wg set wg0 listen-port $ServicePort private-key /etc/wireguard/serverPrivateKey
-wg set wg0 peer $(cat /etc/wireguard/clientPublicKey) persistent-keepalive 25 allowed-ips 10.10.10.2/32 #endpoint 10.10.10.2:$ServicePort
+wg set wg0 peer $(cat /etc/wireguard/clientPublicKey) persistent-keepalive 25 allowed-ips 172.16.16.2/32 #endpoint 172.16.16.2:$ServicePort
 ip link set wg0 up
 
 # config file
@@ -53,7 +54,7 @@ systemctl enable wg-quick@wg0
 sh -c 'umask 077; cat > /etc/wireguard/client.conf' <<-EOF
 [Interface]
 PrivateKey = $(cat /etc/wireguard/clientPrivateKey)
-Address = 10.10.10.2/24 
+Address = 172.16.16.2/24 
 DNS = 8.8.8.8
 MTU = 1420
 
@@ -66,8 +67,9 @@ PersistentKeepalive = 25
 EOF
 
 
-echo "Client conf download from /etc/wireguard/client.conf"
+echo "Client conf download from /etc/wireguard/client.conf , or scan /tmp/client.png "
 qrencode -t ANSIUTF8 < /etc/wireguard/client.conf
+qrencode -t png -o /tmp/client.png < /etc/wireguard/client.conf
 }
 
 function Remove_wireguard(){
@@ -79,7 +81,7 @@ function Remove_wireguard(){
 function Add_wgUser(){
 cd /etc/wireguard/
 UserNumber=$(wg show wg0 "allowed-ips"|wc -l)
-LastIP="10.10.10.$(($UserNumber+2))"
+LastIP="172.16.16.$(($UserNumber+2))"
 wg genkey | tee clientPrivateKey.$UserNumber | wg pubkey > clientPublicKey.$UserNumber # for Client $UserNumber
 \cp -f client{,$UserNumber}.conf
 sed -i "/^PrivateKey/cPrivateKey = $(cat clientPrivateKey.$UserNumber)" /etc/wireguard/client${UserNumber}.conf
@@ -93,9 +95,9 @@ PersistentKeepalive = 25
 EOF
 
 systemctl restart wg-quick@wg0
-echo "Client conf download from /etc/wireguard/client${UserNumber}.conf"
-
+echo "Client conf download from /etc/wireguard/client${UserNumber}.conf , or scan /tmp/client${UserNumber}.png"
 qrencode -t ANSIUTF8 < /etc/wireguard/client${UserNumber}.conf
+qrencode -t png -o /tmp/client${UserNumber}.png < /etc/wireguard/client${UserNumber}.conf
 }
 
 
