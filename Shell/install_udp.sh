@@ -285,7 +285,7 @@ read -p "Please input your selection:" Sel
 case "$Sel" in
   1)
   Get_port
-  Download_soft
+  Install_soft
   Config_soft
   Config_client
   ;;
