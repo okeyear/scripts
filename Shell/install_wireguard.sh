@@ -1,6 +1,6 @@
 
 #!/usr/bin/env bash
-# version: 20190424
+# version: 20190427
 source /etc/os-release
 [ $ID=="centos" -a $VERSION_ID -eq 7 ] && echo 'Your OS is CentOS7 , continue...' || exit
 PublicIP=$(curl -s ifconfig.me)
@@ -9,9 +9,11 @@ function Update_wireguard(){
 }
 function Install_bbr(){ 
   curl -skL https://github.com/teddysun/across/raw/master/bbr.sh | sudo bash - 
+  yum install -y kernel-ml-{headers,tools,tools-libs}
 }
 function Install_wireguard(){
-sudo yum install -y epel-release wget qrencode
+sudo yum install -y epel-release wget qrencode 
+sudo yum install -y kernel-{headers,tools,tools-libs}
 sudo curl -sLo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
 sudo yum install -y wireguard-dkms wireguard-tools
 echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -27,25 +29,22 @@ umask 077
 wg genkey | tee serverPrivateKey | wg pubkey > serverPublicKey # for Server
 wg genkey | tee clientPrivateKey | wg pubkey > clientPublicKey # for Client
 
-ip link add dev wg0 type wireguard
-ip address add dev wg0 172.16.16.1/24
-wg set wg0 listen-port $ServicePort private-key /etc/wireguard/serverPrivateKey
-wg set wg0 peer $(cat /etc/wireguard/clientPublicKey) persistent-keepalive 25 allowed-ips 172.16.16.2/32 #endpoint 172.16.16.2:$ServicePort
-ip link set wg0 up
-
-# config file
-wg showconf wg0 | tee /etc/wireguard/wg0.conf
-wg setconf wg0 /etc/wireguard/wg0.conf
-sed -n '/Peer/,$p' /etc/wireguard/wg0.conf | tee /etc/wireguard/tmp.conf
-sed -i '/Peer/,$d' /etc/wireguard/wg0.conf
-cat >>/etc/wireguard/wg0.conf<<EOF
-PostUp = echo 1 > /proc/sys/net/ipv4/ip_forward; iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o $NetworkAdapter -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o $NetworkAdapter -j MASQUERADE
+cat > /etc/wireguard/wg0.conf <<EOF
+[Interface]
+ListenPort =$ServicePort
+PrivateKey = $(cat /etc/wireguard/serverPrivateKey)
+PostUp = echo 1 > /proc/sys/net/ipv4/ip_forward; iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o $NetworkAdapter -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o $NetworkAdapter -j MASQUERADE
 DNS = 8.8.8.8
+MTU = 1420
 
-$(cat /etc/wireguard/tmp.conf ; rm -f /etc/wireguard/tmp.conf)
+[Peer]
+PublicKey = $(cat /etc/wireguard/clientPublicKey)
+AllowedIPs = 172.16.16.2/32
+PersistentKeepalive = 25
 EOF
-#ip link del wg0
+
+
 wg-quick up wg0
 systemctl enable wg-quick@wg0
 
@@ -85,13 +84,14 @@ LastIP="172.16.16.$(($UserNumber+2))"
 wg genkey | tee clientPrivateKey.$UserNumber | wg pubkey > clientPublicKey.$UserNumber # for Client $UserNumber
 \cp -f client{,$UserNumber}.conf
 sed -i "/^PrivateKey/cPrivateKey = $(cat clientPrivateKey.$UserNumber)" /etc/wireguard/client${UserNumber}.conf
-sed -i "/^PublicKey/cPublicKey = $(cat clientPublicKey.$UserNumber)" /etc/wireguard/client${UserNumber}.conf
+sed -i "/^Address/cAddress = $LastIP\/24" /etc/wireguard/client${UserNumber}.conf
+
 cat >> /etc/wireguard/wg0.conf <<-EOF
+
 [Peer]
 PublicKey = $(cat /etc/wireguard/clientPublicKey.$UserNumber)
 AllowedIPs = $LastIP/32
 PersistentKeepalive = 25
-
 EOF
 
 systemctl restart wg-quick@wg0
@@ -114,7 +114,7 @@ cat <<EOF
    b. install TunSafe
    https://tunsafe.com/$(curl -sk https://tunsafe.com/download | grep -o '/downloads/TunSafe-[0-9.]*-x64.zip')
 3. Linux: https://tunsafe.com/user-guide/linux  
-4. Download /etc/wireguard/client*.conf , and then move to your TunSafe/Config Folder
+4. Download /etc/wireguard/client*.conf , and then move to your TunSafe/Config Folder (or scan /tmp/client.conf )
 EOF
 
 }
@@ -156,3 +156,5 @@ case "$Sel" in
   echo 'Wrong Selction , please run it agian.'
   ;;
 esac
+
+
