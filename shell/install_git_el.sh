@@ -12,7 +12,7 @@ git_ver=$(curl --silent "https://api.github.com/repos/git/git/tags"  |
 
 # 4. download tarball
 # https://github.com/git/git/archive/refs/tags/v2.35.1.tar.gz
-curl -O https://github.com//git/git/archive/refs/tags/${git_ver}.tar.gz
+curl -sSLO https://github.com//git/git/archive/refs/tags/${git_ver}.tar.gz
 
 # 5. unarchive
 tar -xf ${git_ver}.tar.gz -C /usr/local/src/
