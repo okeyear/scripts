@@ -16,7 +16,7 @@ source /etc/profile.d/localbin.sh
 # This VM is 内网(intranet需要代理联网) 外网(public直连互联网) 国外(foreign,repo使用国外源)
 location="${location:-public}"
 if [ "${location}" == "intranet" ]; then
-  export http_proxy='http://ip:port'
+  export http_proxy='http://proxy_ip:proxy_port'
 fi 
 # public_ipv4=$(curl ip.sb)
 
@@ -111,11 +111,11 @@ fi
 
 # 卸载腾讯云监控
 # curl -fsSLO https://raw.githubusercontent.com/littleplus/TencentAgentRemove/master/remove.sh
-if [ -d '/usr/local/qcloud' ] ; then
-  sudo sh /usr/local/qcloud/stargate/admin/uninstall.sh
-  sudo sh /usr/local/qcloud/YunJing/uninst.sh
-  sudo sh /usr/local/qcloud/monitor/barad/admin/uninstall.sh
-fi
+# if [ -d '/usr/local/qcloud' ] ; then
+#   sudo sh /usr/local/qcloud/stargate/admin/uninstall.sh
+#   sudo sh /usr/local/qcloud/YunJing/uninst.sh
+#   sudo sh /usr/local/qcloud/monitor/barad/admin/uninstall.sh
+# fi
 
 
 function install_conda() {
@@ -230,19 +230,19 @@ function set_fail2ban(){
   fail2ban-client status sshd
 }
 
-function set_jianguoyun_webdav(){ 
-  # mount webdav
-  yum install -y davfs2 
-  sed -i '/ignore_dav_header/c ignore_dav_header 1' /etc/davfs2/davfs2.conf
-  mkdir -pv /data/backup/
-  echo 'https://dav.jianguoyun.com/dav/ /data/backup/ davfs user,noauto,file_mode=600,dir_mode=700 0 1' >> /etc/fstab
-  # mount /data/backup/
-}
+# function set_jianguoyun_webdav(){ 
+#   # mount webdav
+#   yum install -y davfs2 
+#   sed -i '/ignore_dav_header/c ignore_dav_header 1' /etc/davfs2/davfs2.conf
+#   mkdir -pv /data/backup/
+#   echo 'https://dav.jianguoyun.com/dav/ /data/backup/ davfs user,noauto,file_mode=600,dir_mode=700 0 1' >> /etc/fstab
+#   # mount /data/backup/
+# }
 
 
 function set_bash_history(){ 
   # set bash history
-  wget -O /etc/profile.d/bash_PROMPT_COMMAND.sh  https://gitee.com/okeyear/script/raw/master/bash_PROMPT_COMMAND.sh
+  wget -O /etc/profile.d/bash_PROMPT_COMMAND.sh  https://raw.githubusercontent.com/okeyear/scripts/main/shell/bash_PROMPT_COMMAND.sh
   echo 'local1.crit  /var/log/bash_history.log' | sudo tee -a /etc/rsyslog.conf
   source /etc/profile.d/bash_PROMPT_COMMAND.sh 
   systemctl restart rsyslog
@@ -259,7 +259,7 @@ function set_git(){
   # 保存用户名和密码
   git config --global credential.helper store
   # 加速github
-  git config --global url."https://hub.fastgit.org".insteadOf https://github.com
+  # git config --global url."https://hub.fastgit.org".insteadOf https://github.com
 
   # 中文乱码
   # https://www.cnblogs.com/perseus/archive/2012/11/21/2781074.html
@@ -327,7 +327,7 @@ fi
 set_firewall
 set_sshd
 # set_fail2ban
-set_jianguoyun_webdav
+# set_jianguoyun_webdav
 set_bash_history
 set_git
 # install tnvm  nvm
