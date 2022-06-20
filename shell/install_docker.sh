@@ -19,9 +19,9 @@ sudo tee /etc/docker/daemon.json <<-'EOF'
 {
   "registry-mirrors": [
     "http://hub-mirror.c.163.com",
-    "https://registry.docker-cn.com",
     "https://xc8hlpxv.mirror.aliyuncs.com",
-    "http://f1361db2.m.daocloud.io"
+    "http://f1361db2.m.daocloud.io",
+    "https://registry.docker-cn.com"
   ],
   "exec-opts": ["native.cgroupdriver=systemd"],
   "log-driver": "json-file",
