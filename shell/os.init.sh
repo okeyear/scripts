@@ -269,6 +269,9 @@ function set_git(){
   git config --global i18n.logoutputencoding gbk
   # 查看配置
   git config --global --list
+  # create git repo folder
+  mkdir -pv $HOME/RemoteWorking/{gitee,gitlab,github}
+
 }
 
 function install_nvm(){ 
