@@ -8,10 +8,11 @@ compose_ver=$(get_github_latest_release docker/compose)
 
 # download latest
 compose_url="https://github.com/docker/compose/releases/download/${compose_ver}/docker-compose-linux-$(arch)"
+# compose_url="https://github.com/docker/compose/releases/download/${compose_ver}/docker-compose-$(uname -s)-$(uname -m)"
 curl -SLO $compose_url
 
 # install
-install docker-compose-linux-$(arch) /usr/bin/docker-compose
+sudo install docker-compose-linux-$(arch) /usr/bin/docker-compose
 
 # install docker-compose bash command completion
 sudo curl \
