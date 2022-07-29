@@ -13,5 +13,10 @@ curl -SLO $compose_url
 # install
 install docker-compose-linux-$(arch) /usr/bin/docker-compose
 
+# install docker-compose bash command completion
+sudo curl \
+    -L https://raw.githubusercontent.com/docker/compose/${compose_ver}/contrib/completion/bash/docker-compose \
+    -o /etc/bash_completion.d/docker-compose
+    
 # check version
 docker-compose version
