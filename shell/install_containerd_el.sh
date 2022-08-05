@@ -18,7 +18,7 @@ sudo tar Cxzvf /usr/local -xf containerd-${containerd_ver/v/}-linux-amd64.tar.gz
 # create default config
 sudo mkdir /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
-# imageRepository
+# imageRepository sandbox_image 
 # registry.aliyuncs.com/google_containers
 
 # systemd service script
