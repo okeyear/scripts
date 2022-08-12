@@ -24,7 +24,7 @@ if [ -r /etc/os-release ]; then
 else
 	# if not existed /etc/os-release, the script will exit
 	echo -e "\e[0;31mNot supported OS\e[0m, \e[0;32m${OS}\e[0m"
-	return
+	exit
 fi
 
 # Package Manager:  yum / apt / apk
@@ -66,15 +66,15 @@ esac
 if [ $ID = 'centos' ]; then
 case $(rpm -E %{rhel}) in 
                     6) 
-						minorver=6.10
-						$SUDO sed -e "s|^mirrorlist=|#mirrorlist=|g" \
-								 -e "s|^#baseurl=http://mirror.centos.org/centos/\$releasever|baseurl=https://mirrors.aliyun.com/centos-vault/$minorver|g" \
-								 -i.bak \
-								 /etc/yum.repos.d/CentOS-*.repo
-						;;
+			 minorver=6.10
+			 $SUDO sed -e "s|^mirrorlist=|#mirrorlist=|g" \
+			 -e "s|^#baseurl=http://mirror.centos.org/centos/\$releasever|baseurl=https://mirrors.aliyun.com/centos-vault/$minorver|g" \
+			 -i.bak \
+			 /etc/yum.repos.d/CentOS-*.repo
+			 ;;
                     7) 
-						$SUDO curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
-						;;
+			 $SUDO curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+			 ;;
                     8) 
 cat <<EOF | sudo tee /etc/yum.repos.d/CentOS-Base-aliyun.repo
 [BaseOS]
@@ -102,9 +102,9 @@ gpgcheck=1
 enabled=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 EOF
-						;;
+			 ;;
                     9) 
-						$SUDO tee /etc/yum.repos.d/centos.repo <<EOF
+			 $SUDO tee /etc/yum.repos.d/centos.repo <<EOF
 [BaseOS]
 name=CentOS-\$releasever - Base - mirrors.aliyun.com
 #failovermethod=priority
@@ -123,7 +123,7 @@ baseurl=https://mirrors.aliyun.com/centos-stream/\$stream/AppStream/\$basearch/o
 gpgcheck=1
 gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
 EOF
-						;;
+			 ;;
 esac
 fi
 
