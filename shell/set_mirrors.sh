@@ -66,7 +66,10 @@ EOF
 esac
 
 if [ $ID = 'centos' ]; then
-case $(rpm -E %{rhel}) in 
+    $SUDO mkdir -pv /etc/yum.repos.d/bak
+    $SUDO mv -f /etc/yum.repos.d/*.* /etc/yum.repos.d/bak/
+
+    case $(rpm -E %{rhel}) in 
                     6) 
 			 minorver=6.10
 			 $SUDO sed -e "s|^mirrorlist=|#mirrorlist=|g" \
