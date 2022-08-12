@@ -9,7 +9,7 @@ set -e
 # run the script as root
 if [ "$EUID" -eq "0" ]; then
     # SUDO='sh -c'
-    SUDO=
+    SUDO=''
 elif command -v sudo  &>/dev/null ; then
     # SUDO='sudo -E sh -c'
     SUDO='sudo -E '
