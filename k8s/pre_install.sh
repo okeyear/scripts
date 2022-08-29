@@ -153,10 +153,27 @@ sudo mkdir -pv /etc/systemd/system/kubelet.service.d
 # kernel 4.19+中 nf_conntrack_ipv4 改为 nf_conntrack
 cat <<EOF | sudo tee /etc/modules-load.d/ipvs.conf
 ip_vs
+ip_vs_lc
+ip_vs_wlc
 ip_vs_rr
 ip_vs_wrr
+ip_vs_lblc
+ip_vs_lblcr
+ip_vs_dh
+ip_vs_sh
+ip_vs_fo
+ip_vs_nq
+ip_vs_sed
+ip_vs_ftp
 ip_vs_sh
 nf_conntrack
+ip_tables
+ip_set
+xt_set
+ipt_set
+ipt_rpfilter
+ipt_REJECT
+ipip
 EOF
 # sudo ls /lib/modules/$(uname -r)/kernel/net/netfilter/ipvs|grep -o "^[^.]*" | sudo tee -a /etc/modules-load.d/ipvs.conf
 # systemctl status systemd-modules-load.service
