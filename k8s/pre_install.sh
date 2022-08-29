@@ -17,7 +17,7 @@ set -e
 ###################
 # 2. yum repo配置, include docker repo
 # sudo curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
-sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz
+sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz rsync
 # sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
 ###################
