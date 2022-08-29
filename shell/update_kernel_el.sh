@@ -28,8 +28,8 @@ sudo grub2-editenv list
 # awk -F"'" '/^menuentry/{print $2}'  /boot/efi/EFI/redhat/grub.cfg
 # grub2-set-default "${elrepo_menu}"
 
-sudo grub2-set-default 0
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+sudo grub2-set-default 0
 sudo grub2-editenv list
 
 # install kernel-headers
