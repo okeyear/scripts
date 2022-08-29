@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
-set -e
+# set -e
 # stty erase ^H
 ###################
 # 1. hostname和hosts配置
@@ -16,10 +16,38 @@ set -e
 
 ###################
 # 2. yum repo配置, include docker repo
-# sudo curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
+source /etc/profile.d/localbin.sh
+
+if [ -r /etc/os-release ]; then
+	. /etc/os-release
+else
+	# if not existed /etc/os-release, the script will exit
+	echo -e "\e[0;31mNot supported OS\e[0m, \e[0;32m${OS}\e[0m"
+	exit
+fi
+
+# Package Manager:  yum / apt / apk
+case $ID in 	
+	centos) 
+		export PM='yum' 
+    sudo curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+    # curl -sSL https://raw.githubusercontent.com/okeyear/scripts/main/shell/update_kernel_el.sh | sudo sh - 
+		;;
+	almalinux) 
+		export PM='yum' 
+		# set mirrors
+		sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+		  -e 's|^# baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
+		  -i.bak \
+		  /etc/yum.repos.d/almalinux*.repo
+		  ;;
+esac
+
+
 sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz rsync
 # sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
+
 ###################
 
 # 3. firewall
