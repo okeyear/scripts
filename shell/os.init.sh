@@ -243,7 +243,8 @@ function set_fail2ban(){
 function set_bash_history(){ 
   # set bash history
   wget -O /etc/profile.d/bash_PROMPT_COMMAND.sh  https://raw.githubusercontent.com/okeyear/scripts/main/shell/bash_PROMPT_COMMAND.sh
-  echo 'local1.crit  /var/log/bash_history.log' | sudo tee -a /etc/rsyslog.conf
+  echo 'local1.crit /var/log/bash_history.log' | sudo tee /etc/rsyslog.d/bash_history.conf 
+  echo '& stop' | sudo tee -a /etc/rsyslog.d/bash_history.conf 
   source /etc/profile.d/bash_PROMPT_COMMAND.sh 
   systemctl restart rsyslog
 }
