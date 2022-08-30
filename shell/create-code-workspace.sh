@@ -3,7 +3,7 @@ BASEDIR=$(pwd)
 DIRNAME=${BASEDIR##*/}
 echo '{' | tee $DIRNAME.code-workspace
 echo '  "folders": [' | tee -a $DIRNAME.code-workspace
-for folder in $(find -maxdepth 1 -type d  -print)
+for folder in $(ls -l | grep "^d" | awk '{print $NF}')
 do
     echo '    {' | tee -a $DIRNAME.code-workspace
     echo '      "path": "'$folder'"' | tee -a $DIRNAME.code-workspace
