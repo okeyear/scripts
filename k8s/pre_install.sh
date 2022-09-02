@@ -47,6 +47,7 @@ esac
 
 sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz rsync
 # sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+# echo 'export PATH=$PATH:/usr/local/bin' | sudo tee /etc/profile.d/localbin.sh
 
 ###################
 
