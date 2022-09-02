@@ -1,4 +1,7 @@
-# 创建5个独立的Edge浏览器快捷方式， 通过 msedge.exe --user-data-dir=[path] 启动
+# 创建5个独立的Edge浏览器快捷方式， 通过 msedge.exe --user-data-dir=[path] 启动, 隔离
+# 适用于测试：比如同一个网站， 要登录不同的账号
+# 可选安装不同浏览器， 每个浏览器登录一个账号
+
 # create Num chromeEdge shotcut
 $num = 1..5
 foreach ($n in $num) {
