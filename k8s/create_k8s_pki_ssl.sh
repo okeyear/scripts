@@ -170,6 +170,7 @@ EOF
 cfssl gencert -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
+    -hostname=$(awk '/etcd/{printf $1","}' /etc/hosts | sed 's/,$//') \
     -profile=kubernetes kube-apiserver-csr.json | cfssljson -bare kube-apiserver
 # kube-apiserver-key.pem  kube-apiserver.csr  kube-apiserver.pem
 
