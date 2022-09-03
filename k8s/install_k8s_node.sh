@@ -79,7 +79,7 @@ kubectl describe clusterrolebinding cluster-system-anonymous
 kubectl describe clusterrolebinding kubelet-bootstrap
 
 
-# 创建kubelet服务管理文件
+# 创建kubelet服务管理文件, /etc/kubernetes/kubelet.kubeconfig 不用手工生成
 
 sudo tee kubelet.service <<EOF
 [Unit]
