@@ -160,29 +160,48 @@ kubectl config use-context system:kube-controller-manager --kubeconfig=kube-cont
 sudo cp kube-controller-manager.kubeconfig /etc/kubernetes/
 
 
+######################
+# 同步到其他节点
+MasterNodes='k8s-master02 k8s-master03'
+for NODE in $MasterNodes
+do 
+    echo scp on $NODE;   
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/
+done
+
+
 sudo tee /etc/kubernetes/kube-controller-manager.conf <<EOF
-KUBE_CONTROLLER_MANAGER_OPTS="  --logtostderr=true \
+KUBE_CONTROLLER_MANAGER_OPTS="      --port=10252 \
+    --secure-port=10257 \
     --v=2 \
+    --alsologtostderr=true \
+    --logtostderr=false \
     --log-dir=/var/log/kubernetes \
     --master=127.0.0.1:8080 \
     --address=127.0.0.1 \
+    --tls-cert-file=/etc/kubernetes/pki/kube-controller-manager.pem \
+    --tls-private-key-file=/etc/kubernetes/pki/kube-controller-manager-key.pem \
     --root-ca-file=/etc/kubernetes/pki/ca.pem \
+    --cluster-name=kubernetes \
     --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
     --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
     --service-account-private-key-file=/etc/kubernetes/pki/ca-key.pem \
     --kubeconfig=/etc/kubernetes/kube-controller-manager.kubeconfig \
+    --experimental-cluster-signing-duration=87600h \
+    --feature-gates=RotateKubeletServerCertificate=true \
     --leader-elect=true \
     --use-service-account-credentials=true \
     --node-monitor-grace-period=40s \
     --node-monitor-period=5s \
     --pod-eviction-timeout=2m0s \
     --controllers=*,bootstrapsigner,tokencleaner \
+    --horizontal-pod-autoscaler-sync-period=10s \
     --allocate-node-cidrs=true \
     --cluster-cidr=10.244.0.0/16 \
     --service-cluster-ip-range=10.96.0.0/12  \
     --node-cidr-mask-size=24 "
 EOF
-#     --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.pem \
+
 sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
 [Unit]
 Description=Kubernetes Controller Manager
