@@ -166,7 +166,7 @@ sudo tee kube-apiserver-csr.json <<EOF
 }
 EOF
 
-# 签发证书
+# 签发证书, 注意 hostname加etcd的地址ip1,ip2..ipn
 cfssl gencert -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
