@@ -152,7 +152,7 @@ kubectl config set-credentials system:kube-controller-manager \
     --client-certificate=kube-controller-manager.pem --client-key=kube-controller-manager-key.pem --embed-certs=true \
     --kubeconfig=kube-controller-manager.kubeconfig
     
-kubectl config set-context kubernetes --cluster=kubernetes \
+kubectl config set-context system:kube-controller-manager --cluster=kubernetes \
     --user=system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
     
 kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
