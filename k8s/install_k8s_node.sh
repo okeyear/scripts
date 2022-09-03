@@ -116,14 +116,16 @@ WantedBy=multi-user.target
 EOF
 
 #### 拷贝到本级对应目录
+sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes /var/lib/kubelet
 sudo cp kubelet-bootstrap.kubeconfig /etc/kubernetes/
 sudo cp kubelet.service /usr/lib/systemd/system/
 
 # 同步到其他节点
-MasterNodes='k8s-master02 k8s-master03'
+MasterNodes='k8s-master02 k8s-master03 k8s-node01'
 for NODE in $MasterNodes
 do 
     echo scp on $NODE;   
+    ssh $SUDO_USER@$NODE 'sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes /var/lib/kubelet'; 
     rsync -av --progress --rsync-path="sudo rsync" kubelet-bootstrap.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
     rsync -av --progress --rsync-path="sudo rsync" kubelet.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
 done
