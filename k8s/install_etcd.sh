@@ -129,9 +129,9 @@ ETCDCTL_API=3 /usr/local/bin/etcdctl \
     --cert=etcd.pem \
     --key=etcd-key.pem \
     --endpoints="$(awk '/etcd/{printf "https://"$1":2379,"}' /etc/hosts | sed 's/,$//')" \
-    endpoint status
+    endpoint health
+    # endpoint status
     # member list
-    # endpoint health
     # check perf
 
 # /usr/local/bin/cfssl-certinfo --cert /etc/etcd/ssl/
