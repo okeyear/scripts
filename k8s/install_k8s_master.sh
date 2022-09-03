@@ -144,6 +144,7 @@ done
 
 
 ### 3. kube-controller-manager 服务和配置
+# master01节点
 
 kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true \
     --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 --kubeconfig=kube-controller-manager.kubeconfig
@@ -157,20 +158,7 @@ kubectl config set-context system:kube-controller-manager --cluster=kubernetes \
     
 kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
 
-sudo cp kube-controller-manager.kubeconfig /etc/kubernetes/
-
-
-######################
-# 同步到其他节点
-MasterNodes='k8s-master02 k8s-master03'
-for NODE in $MasterNodes
-do 
-    echo scp on $NODE;   
-    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/
-done
-
-
-sudo tee /etc/kubernetes/kube-controller-manager.conf <<EOF
+sudo tee kube-controller-manager.conf <<EOF
 KUBE_CONTROLLER_MANAGER_OPTS="      --port=10252 \
     --secure-port=10257 \
     --v=2 \
@@ -202,7 +190,7 @@ KUBE_CONTROLLER_MANAGER_OPTS="      --port=10252 \
 EOF
 #     --master=127.0.0.1:8080 \
 
-sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
+sudo tee kube-controller-manager.service <<EOF
 [Unit]
 Description=Kubernetes Controller Manager
 Documentation=https://github.com/kubernetes/kubernetes
@@ -218,8 +206,27 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
+#### 拷贝到本级对应目录
+sudo cp kube-controller-manager.conf /etc/kubernetes/
+sudo cp kube-controller-manager.kubeconfig /etc/kubernetes/
+sudo cp kube-controller-manager*.pem /etc/kubernetes/pki/
+sudo cp kube-controller-manager.service /usr/lib/systemd/system/
+
+# 同步到其他节点
+MasterNodes='k8s-master02 k8s-master03'
+for NODE in $MasterNodes
+do 
+    echo scp on $NODE;   
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.conf $SUDO_USER@$NODE:/etc/kubernetes/
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager*.pem  $SUDO_USER@$NODE:/etc/kubernetes/pki/
+done
+
+# 所有节点
 sudo systemctl daemon-reload
 sudo systemctl enable --now kube-controller-manager
+
 
 
 ### 4. kube-scheduler 服务和配置
