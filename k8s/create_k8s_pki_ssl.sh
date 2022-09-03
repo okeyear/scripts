@@ -305,3 +305,20 @@ cfssl gencert -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
     -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy
+    
+    
+### 9. token
+# 生成token
+sudo tee token.csv <<EOF
+$(head -c 16 /dev/urandom | od -An -t x | tr -d ' '),kubelet-bootstrap,10001,"system:kubelet-bootstrap"
+EOF
+
+# 说明
+# 创建TLS机制所需TOKEN
+# TLS Bootstraping: Master apiserver启用TLS认证后, Node节点kubelet 和 kube-proxy域kube-apiserver进行通信,
+# 必须使用CA签发的有效证书才可以.当Node节点很多时候, 这种客户端证书颁发需要大量工作, 同样也会增加集群扩展复杂度.
+# 为了简化流程, kubernetes 引入了TLS Bootstraping机制来自动颁发客户端证书, kubelet会以一个低权限用户自动向apiserver申请证书, kubelet的证书由apiserver动态签发.
+# 所以强烈建议在Node上使用这种方式.
+# 目前主要用于Kubelet, kube-proxy还是由我们统一颁发一个证书.
+
+
