@@ -23,7 +23,7 @@ do
     ssh $SUDO_USER@$NODE 'sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes';     
     # 用rsync替代scp,解决目标机器 需要sudu权限的问题
     rsync -av --progress --rsync-path="sudo rsync" /usr/local/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy} $SUDO_USER@$NODE:/usr/local/bin/; 
-    rsync -av --progress  --rsync-path="sudo rsync" token.csv ca.pem ca-key.pem kube-apiserver-key.pem kube-apiserver.pem sa.key sa.pub $SUDO_USER@$NODE:/etc/kubernetes/pki; 
+    rsync -av --progress  --rsync-path="sudo rsync" token.csv ca.pem ca-key.pem kube-apiserver-key.pem kube-apiserver.pem $SUDO_USER@$NODE:/etc/kubernetes/pki; 
 done
 
 
@@ -52,6 +52,7 @@ KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,
     --kubelet-client-key=/etc/kubernetes/pki/kube-apiserver-key.pem  \
     --service-account-key-file=/etc/kubernetes/pki/ca-key.pem \
     --service-account-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+    --service-account-issuer=https://kubernetes.default.svc.cluster.local \
     --etcd-servers="$(awk '/etcd/{printf "https://"$1":2379,"}' /etc/hosts | sed 's/,$//')" \
     --etcd-cafile=/etc/etcd/ssl/ca.pem  \
     --etcd-certfile=/etc/etcd/ssl/etcd.pem  \
@@ -68,7 +69,7 @@ KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,
     --v=2
 "
 EOF
-#     --service-account-issuer=https://kubernetes.default.svc.cluster.local \
+
 
 
 # apiserver 服务脚本
@@ -100,7 +101,7 @@ sudo systemctl enable --now kube-apiserver
 curl --noproxy "*" --insecure https://k8s-master01:6443/
 curl --noproxy "*" --insecure https://k8s-master02:6443/
 curl --noproxy "*" --insecure https://k8s-master03:6443/
-curl --noproxy "*" --insecure https://lb-vip:6443/
+curl --noproxy "*" --insecure https://lb-vip:8443/
 
 
 ### 2. kube-controller-manager 服务和配置
