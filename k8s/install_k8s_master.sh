@@ -58,6 +58,8 @@ KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,
     --etcd-certfile=/etc/etcd/ssl/etcd.pem  \
     --etcd-keyfile=/etc/etcd/ssl/etcd-key.pem  \
     --allow-privileged=true \
+    --enable-swagger-ui=true \
+    --apiserver-count=3 \
     --audit-log-maxage=30 \
     --audit-log-maxbackup=3 \
     --audit-log-maxsize=100 \
@@ -66,8 +68,7 @@ KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,
     --alsologtostderr=true \
     --logtostderr=false \
     --log-dir=/var/log/kubernetes \
-    --v=2
-"
+    --v=2 "
 EOF
 
 
@@ -131,8 +132,7 @@ KUBE_CONTROLLER_MANAGER_OPTS="  --logtostderr=true \
     --allocate-node-cidrs=true \
     --cluster-cidr=10.244.0.0/16 \
     --service-cluster-ip-range=10.96.0.0/12  \
-    --node-cidr-mask-size=24
-"
+    --node-cidr-mask-size=24 "
 EOF
 #     --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.pem \
 sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
@@ -166,8 +166,7 @@ KUBE_SCHEDULER_OPTS="  --logtostderr=true \
     --address=127.0.0.1 \
     --leader-elect=true  \
     --alsologtostderr=true \
-    --logtostderr=false 
-"
+    --logtostderr=false "
 EOF
 
 sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
