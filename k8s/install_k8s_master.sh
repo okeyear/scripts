@@ -107,9 +107,11 @@ curl --noproxy "*" --insecure https://lb-vip:8443/
 
 
 ### 2. kubectl 安装配置
-# 设置集群参数
-kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):6443 --kubeconfig=kubectl.kubeconfig
-#设置客户端认证参数
+# 设置集群参数, 此处lb haproxy也安装在master阶段,为了避免冲突, vip用的8443端口, 不是6443
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem \
+    --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 --kubeconfig=kubectl.kubeconfig
+    
+# 设置客户端认证参数
 kubectl config set-credentials admin --client-certificate=admin.pem --client-key=admin-key.pem --embed-certs=true --kubeconfig=kubectl.kubeconfig
 # 设置上下文参数,包含集群名称和访问集群的用户名字
 kubectl config set-context kubernetes --cluster=kubernetes --user=admin --kubeconfig=kubectl.kubeconfig
