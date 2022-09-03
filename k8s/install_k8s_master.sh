@@ -143,12 +143,22 @@ done
 
 
 
-### 2. kube-controller-manager 服务和配置
-# kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):6443 --kubeconfig=kube-controller-manager.kubeconfig
-# kubectl config set-credentials system:kube-controller-manager --client-certificate=kube-controller-manager.pem --client-key=kube-controller-manager-key.pem --embed-certs=true --kubeconfig=kube-controller-manager.kubeconfig
-# kubectl config set-context kubernetes --cluster=kubernetes --user=system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
-# kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
-# sudo cp kube-controller-manager.kubeconfig /etc/kubernetes/
+### 3. kube-controller-manager 服务和配置
+
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true \
+    --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 --kubeconfig=kube-controller-manager.kubeconfig
+    
+kubectl config set-credentials system:kube-controller-manager \
+    --client-certificate=kube-controller-manager.pem --client-key=kube-controller-manager-key.pem --embed-certs=true \
+    --kubeconfig=kube-controller-manager.kubeconfig
+    
+kubectl config set-context kubernetes --cluster=kubernetes \
+    --user=system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
+    
+kubectl config use-context system:kube-controller-manager --kubeconfig=kube-controller-manager.kubeconfig
+
+sudo cp kube-controller-manager.kubeconfig /etc/kubernetes/
+
 
 sudo tee /etc/kubernetes/kube-controller-manager.conf <<EOF
 KUBE_CONTROLLER_MANAGER_OPTS="  --logtostderr=true \
@@ -193,7 +203,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now kube-controller-manager
 
 
-### 2. kube-scheduler 服务和配置
+### 4. kube-scheduler 服务和配置
 
 sudo tee /etc/kubernetes/kube-scheduler.conf <<EOF
 KUBE_SCHEDULER_OPTS="  --logtostderr=true \
