@@ -53,7 +53,7 @@ KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,
     --service-account-key-file=/etc/kubernetes/pki/ca-key.pem \
     --service-account-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
     --service-account-issuer=https://kubernetes.default.svc.cluster.local \
-    --etcd-servers="$(awk '/etcd/{printf "https://"$1":2379,"}' /etc/hosts | sed 's/,$//')" \
+    --etcd-servers=https://$(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}'):2379 \
     --etcd-cafile=/etc/etcd/ssl/ca.pem  \
     --etcd-certfile=/etc/etcd/ssl/etcd.pem  \
     --etcd-keyfile=/etc/etcd/ssl/etcd-key.pem  \
