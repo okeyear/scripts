@@ -3,14 +3,12 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
 
 ### 1. install cfssl
-# cfssl required
+# cfssl required, https://github.com/cloudflare/cfssl/releases
 : <<EOF
-sudo wget -c "https://pkg.cfssl.org/R1.2/cfssl_linux-amd64"
-sudo wget -c "https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64"
-sudo wget -c "https://pkg.cfssl.org/R1.2/cfssl-certinfo_linux-amd64"
-sudo install -m 755 cfssl_linux-amd64 /bin/cfssl
-sudo install -m 755 cfssljson_linux-amd64 /bin/cfssljson
-sudo install -m 755 cfssl-certinfo_linux-amd64 /bin/cfssl-certinfo
+cfssl_ver='1.6.2'
+sudo install -m 755 "cfssl_${cfssl_ver/v/}_linux_amd64" /bin/cfssl
+sudo install -m 755 "cfssljson_${cfssl_ver/v/}_linux_amd64" /bin/cfssljson
+sudo install -m 755 "cfssl-certinfo_${cfssl_ver/v/}_linux_amd64" /bin/cfssl-certinfo
 cfssl version
 EOF
 
