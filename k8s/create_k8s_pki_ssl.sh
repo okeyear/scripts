@@ -170,7 +170,7 @@ EOF
 
 
 ### 5. kubectl CSR
-# 当前IP地址, 预留一些以后用
+# 当前IP地址, 预留一些以后用, 注意这地方的O 和OU
 sudo tee admin-csr.json <<EOF
 {
   "CN": "admin",
@@ -191,8 +191,8 @@ sudo tee admin-csr.json <<EOF
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
-      "O": "$O",
-      "OU": "$OU"
+      "O": "system:masters",
+      "OU": "system"
     }]
 }
 EOF
