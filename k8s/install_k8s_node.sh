@@ -50,6 +50,9 @@ sed -i.bak '/plugins."io.containerd.grpc.v1.cri".registry.mirrors/a    [plugins.
 sudo systemctl daemon-reload
 sudo systemctl enable --now containerd.service
 
+# 如果在内网,不能直接联网,需要设置下proxy
+# /etc/systemd/system/containerd.service.d/http_proxy.conf 
+
 
 
 ### 2. kubelet 安装配置
