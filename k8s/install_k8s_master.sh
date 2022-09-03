@@ -244,13 +244,11 @@ kubectl config set-context system:kube-scheduler --cluster=kubernetes \
     
 kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
 
-
 sudo tee kube-scheduler.conf <<EOF
 KUBE_SCHEDULER_OPTS="  --logtostderr=true \
     --v=2 \
-    --kubeconfig=/etc/kubernetes/kube-scheduler.conf \
+    --kubeconfig=/etc/kubernetes/kube-scheduler.kubeconfig \
     --log-dir=/var/log/kubernetes \
-    --master=127.0.0.1:8080 \
     --address=127.0.0.1 \
     --leader-elect=true  \
     --alsologtostderr=true \
@@ -293,6 +291,5 @@ done
 sudo systemctl daemon-reload
 sudo systemctl enable --now kube-scheduler
 # sudo systemctl status kube-scheduler
-
 
 
