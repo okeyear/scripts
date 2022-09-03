@@ -35,7 +35,7 @@ done
 sudo tee /etc/kubernetes/kube-apiserver.conf <<EOF
 KUBE_APISERVER_OPTS=" --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,ResourceQuota \
     --anonymous-auth=false \
-    --bind-address=0.0.0.0  \
+    --bind-address=$(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}')  \
     --secure-port=6443  \
     --allow-privileged=true \
     --advertise-address=$(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}') \
