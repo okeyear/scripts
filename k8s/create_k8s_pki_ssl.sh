@@ -204,7 +204,8 @@ cfssl gencert -ca=ca.pem \
     -profile=kubernetes admin-csr.json | cfssljson -bare admin
 
 
-### 6. kube-controller-manager cert
+### 6. kube-controller-manager cert , 注意O OU
+
 sudo tee kube-controller-manager-csr.json <<EOF
 {
   "CN": "system:kube-controller-manager",
@@ -222,8 +223,8 @@ sudo tee kube-controller-manager-csr.json <<EOF
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
-      "O": "$O",
-      "OU": "$OU"
+      "O": "system:kube-controller-manager",
+      "OU": "system"
     }]
 }
 EOF
