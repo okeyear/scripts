@@ -217,8 +217,7 @@ MasterNodes='k8s-master02 k8s-master03'
 for NODE in $MasterNodes
 do 
     echo scp on $NODE;   
-    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.conf $SUDO_USER@$NODE:/etc/kubernetes/
-    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
+    rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.conf kube-controller-manager.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
     rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
     rsync -av --progress --rsync-path="sudo rsync" kube-controller-manager*.pem  $SUDO_USER@$NODE:/etc/kubernetes/pki/
 done
@@ -230,6 +229,21 @@ sudo systemctl enable --now kube-controller-manager
 
 
 ### 4. kube-scheduler 服务和配置
+
+# master01节点
+
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true \
+    --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 --kubeconfig=kube-scheduler.kubeconfig
+    
+kubectl config set-credentials system:kube-scheduler \
+    --client-certificate=kube-scheduler.pem --client-key=kube-scheduler-key.pem --embed-certs=true \
+    --kubeconfig=kube-scheduler.kubeconfig
+    
+kubectl config set-context system:kube-scheduler --cluster=kubernetes \
+    --user=system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
+    
+kubectl config use-context system:kube-scheduler --kubeconfig=kube-scheduler.kubeconfig
+
 
 sudo tee kube-scheduler.conf <<EOF
 KUBE_SCHEDULER_OPTS="  --logtostderr=true \
@@ -260,6 +274,7 @@ WantedBy=multi-user.target
 EOF
 
 #### 拷贝到本级对应目录
+sudo cp kube-scheduler.kubeconfig /etc/kubernetes/
 sudo cp kube-scheduler.conf /etc/kubernetes/
 sudo cp kube-scheduler*.pem /etc/kubernetes/pki/
 sudo cp kube-scheduler.service /usr/lib/systemd/system/
@@ -269,7 +284,7 @@ MasterNodes='k8s-master02 k8s-master03'
 for NODE in $MasterNodes
 do 
     echo scp on $NODE;   
-    rsync -av --progress --rsync-path="sudo rsync" kube-scheduler.conf $SUDO_USER@$NODE:/etc/kubernetes/
+    rsync -av --progress --rsync-path="sudo rsync" kube-scheduler.conf kube-scheduler.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/
     rsync -av --progress --rsync-path="sudo rsync" kube-scheduler.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
     rsync -av --progress --rsync-path="sudo rsync" kube-scheduler*.pem  $SUDO_USER@$NODE:/etc/kubernetes/pki/
 done
@@ -278,3 +293,6 @@ done
 sudo systemctl daemon-reload
 sudo systemctl enable --now kube-scheduler
 # sudo systemctl status kube-scheduler
+
+
+
