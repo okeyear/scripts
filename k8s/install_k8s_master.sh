@@ -105,6 +105,42 @@ curl --noproxy "*" --insecure https://k8s-master03:6443/
 curl --noproxy "*" --insecure https://lb-vip:8443/
 
 
+
+### 2. kubectl 安装配置
+# 设置集群参数
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):6443 --kubeconfig=kubectl.kubeconfig
+#设置客户端认证参数
+kubectl config set-credentials admin --client-certificate=admin.pem --client-key=admin-key.pem --embed-certs=true --kubeconfig=kubectl.kubeconfig
+# 设置上下文参数,包含集群名称和访问集群的用户名字
+kubectl config set-context kubernetes --cluster=kubernetes --user=admin --kubeconfig=kubectl.kubeconfig
+# 使用默认上下文
+kubectl config use-context kubernetes --kubeconfig=kubectl.kubeconfig
+
+############
+# 准备kubectl配置文件并进行角色绑定
+mkdir ~/.kube
+cp kubectl.kubeconfig ~/.kube/config
+kubectl create clusterrolebinding kube-apiserver:kubelet-apis --clusterrole=system:kubelet-api-admin --user kubernetes --kubeconfig=$HOME/.kube/config
+
+# 查看集群状态
+export KUBECONFIG=$HOME/.kube/config
+kubectl cluster-info
+kubectl get componentstatuses
+kubectl get all --all-namespaces
+
+######################
+# 同步到其他节点
+MasterNodes='k8s-master02 k8s-master03'
+for NODE in $MasterNodes
+do 
+    echo scp on $NODE; 
+    ssh $SUDO_USER@$NODE 'sudo mkdir -p /root/.kube';     
+    rsync -av --progress --rsync-path="sudo rsync" kubectl.kubeconfig $SUDO_USER@$NODE:/root/.kube/config; 
+done
+
+
+
+
 ### 2. kube-controller-manager 服务和配置
 # kubectl config set-cluster kubernetes --certificate-authority=ca.pem --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):6443 --kubeconfig=kube-controller-manager.kubeconfig
 # kubectl config set-credentials system:kube-controller-manager --client-certificate=kube-controller-manager.pem --client-key=kube-controller-manager-key.pem --embed-certs=true --kubeconfig=kube-controller-manager.kubeconfig
