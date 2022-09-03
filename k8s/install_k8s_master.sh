@@ -231,7 +231,7 @@ sudo systemctl enable --now kube-controller-manager
 
 ### 4. kube-scheduler 服务和配置
 
-sudo tee /etc/kubernetes/kube-scheduler.conf <<EOF
+sudo tee kube-scheduler.conf <<EOF
 KUBE_SCHEDULER_OPTS="  --logtostderr=true \
     --v=2 \
     --kubeconfig=/etc/kubernetes/kube-scheduler.conf \
@@ -243,7 +243,7 @@ KUBE_SCHEDULER_OPTS="  --logtostderr=true \
     --logtostderr=false "
 EOF
 
-sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
+sudo tee kube-scheduler.service <<EOF
 [Unit]
 Description=Kubernetes Scheduler
 Documentation=https://github.com/kubernetes/kubernetes
@@ -259,5 +259,22 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
+#### 拷贝到本级对应目录
+sudo cp kube-scheduler.conf /etc/kubernetes/
+sudo cp kube-scheduler*.pem /etc/kubernetes/pki/
+sudo cp kube-scheduler.service /usr/lib/systemd/system/
+
+# 同步到其他节点
+MasterNodes='k8s-master02 k8s-master03'
+for NODE in $MasterNodes
+do 
+    echo scp on $NODE;   
+    rsync -av --progress --rsync-path="sudo rsync" kube-scheduler.conf $SUDO_USER@$NODE:/etc/kubernetes/
+    rsync -av --progress --rsync-path="sudo rsync" kube-scheduler.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
+    rsync -av --progress --rsync-path="sudo rsync" kube-scheduler*.pem  $SUDO_USER@$NODE:/etc/kubernetes/pki/
+done
+
+# 所有节点
 sudo systemctl daemon-reload
 sudo systemctl enable --now kube-scheduler
+# sudo systemctl status kube-scheduler
