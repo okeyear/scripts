@@ -13,7 +13,7 @@ etcdctl version
 
 # 证书从当前目录拷贝到本机对应目录
 # https://github.com/okeyear/scripts/blob/main/k8s/create_k8s_pki_ssl.sh
-sudo mkdir -p /etc/etcd/ssl
+sudo mkdir -p /etc/etcd/ssl /var/lib/etcd
 sudo cp ca.pem /etc/etcd/ssl/
 sudo cp etcd*.pem /etc/etcd/ssl/
 
