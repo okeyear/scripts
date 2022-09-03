@@ -30,8 +30,8 @@ frontend monitor-in
     monitor-uri /monitor
 
 frontend k8s-master
-    bind 0.0.0.0:6443
-    bind 127.0.0.1:6443
+    bind 0.0.0.0:8443
+    bind 127.0.0.1:8443
     mode tcp
     option tcplog
     tcp-request inspect-delay 5s
@@ -115,3 +115,4 @@ EOF
 
 # 启动ha1 ha2上的服务
 sudo systemctl enable --now haproxy keepalived
+sudo systemctl restart haproxy keepalived
