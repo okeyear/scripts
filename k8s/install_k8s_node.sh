@@ -5,4 +5,6 @@ export LANG=en
 ### 1. containerd
 
 
-### 2.
+### 2. kubelet 安装配置
+
+
