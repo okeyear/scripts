@@ -175,4 +175,84 @@ sudo systemctl enable --now kubelet
 
 ### 3. kube-proxy 安装配置
 
+# 在master01上操作
+
+# 设置集群参数, 此处lb haproxy也安装在master阶段,为了避免冲突, vip用的8443端口, 不是6443
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem \
+    --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 \
+    --kubeconfig=kube-proxy.kubeconfig
+# 设置客户端认证参数
+kubectl config set-credentials kube-proxy --client-certificate=kube-proxy.pem \
+    --client-key=kube-proxy-key.pem --embed-certs=true --kubeconfig=kube-proxy.kubeconfig
+# 设置上下文参数,包含集群名称和访问集群的用户名字
+kubectl config set-context default --cluster=kubernetes --user=kubelet-proxy --kubeconfig=kube-proxy.kubeconfig
+# 使用默认上下文
+kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
+
+
+
+
+sudo tee kube-proxy.service <<EOF
+[Unit]
+Description=Kubernetes Kube-Proxy Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+WorkingDirectory=/var/lib/kube-proxy
+ExecStart=/usr/local/bin/kube-proxy \
+  --config=/etc/kubernetes/kube-proxy.config.yaml \
+    --alsologtostderr=true \
+    --logtostderr=false \
+    --log-dir=/var/log/kubernetes \
+    --v=2 
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+#### 拷贝到本级对应目录
+sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes /var/lib/kube-proxy
+sudo cp kube-proxy.kubeconfig kube-proxy*.pem /etc/kubernetes/
+sudo cp kube-proxy.service /usr/lib/systemd/system/
+
+# 同步到其他节点
+MasterNodes='k8s-master02 k8s-master03'
+for NODE in $MasterNodes
+do 
+    echo scp on $NODE;   
+    ssh $SUDO_USER@$NODE 'sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes /var/lib/kube-proxy'; 
+    rsync -av --progress --rsync-path="sudo rsync" kube-proxy.kubeconfig kube-proxy*.pem $SUDO_USER@$NODE:/etc/kubernetes/    
+    rsync -av --progress --rsync-path="sudo rsync" kube-proxy.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
+done
+
+# 所有节点
+# kubelet配置文件
+sudo tee /etc/kubernetes/kube-proxy.config.yaml <<EOF
+kind: KubeProxyConfiguration
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+clientConnection:
+  burst: 200
+  kubeconfig: "/etc/kubernetes/kube-proxy.kubeconfig"
+  qps: 100
+bindAddress: $(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}')
+healthzBindAddress: $(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}'):10256
+metricsBindAddress: $(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}'):10249
+enableProfiling: true
+clusterCIDR: 10.244.0.0/16
+mode: "ipvs"
+portRange: ""
+kubeProxyIPTablesConfiguration:
+  masqueradeAll: false
+kubeProxyIPVSConfiguration:
+  scheduler: rr
+  excludeCIDRs: []
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now kube-proxy
 
