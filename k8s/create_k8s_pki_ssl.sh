@@ -124,7 +124,7 @@ cfssl gencert -ca=ca.pem \
 
 
 ### 4. kube-apiserver CSR
-# 当前IP地址, 预留一些以后用
+# 当前IP地址, 预留一些以后用, 这里只需要master, etcd, lb即可, node节点IP没必要写进去
 sudo tee kube-apiserver-csr.json <<EOF
 {
   "CN": "kubernetes",
