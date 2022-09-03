@@ -319,4 +319,4 @@ EOF
 # 所以强烈建议在Node上使用这种方式.
 # 目前主要用于Kubelet, kube-proxy还是由我们统一颁发一个证书.
 
-
+# rm -f *.pem *.csr *-csr.json
