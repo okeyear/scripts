@@ -56,6 +56,28 @@ sudo systemctl enable --now containerd.service
 
 
 ### 2. kubelet 安装配置
+# 在master01上操作
+BOOTSTRAP_TOKEN=$(awk -F',' '{print $1}' token.csv)
+# 设置集群参数, 此处lb haproxy也安装在master阶段,为了避免冲突, vip用的8443端口, 不是6443
+kubectl config set-cluster kubernetes --certificate-authority=ca.pem \
+    --embed-certs=true --server=https://$(grep "lb-vip" /etc/hosts | grep -v ^127 | awk '{print $1}'):8443 \
+    --kubeconfig=kubelet-bootstrap.kubeconfig
+# 设置客户端认证参数
+kubectl config set-credentials kubelet-bootstrap --token=${BOOTSTRAP_TOKEN} --kubeconfig=kubelet-bootstrap.kubeconfig
+# 设置上下文参数,包含集群名称和访问集群的用户名字
+kubectl config set-context default --cluster=kubernetes --user=kubelet-bootstrap --kubeconfig=kubelet-bootstrap.kubeconfig
+# 使用默认上下文
+kubectl config use-context default --kubeconfig=kubelet-bootstrap.kubeconfig
+# 进行角色绑定
+kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster-admin --user kubelet-bootstrap 
+# kubectl delete clusterrolebinding cluster-system-anonymous
+kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper \
+  --user kubelet-bootstrap \
+  --kubeconfig=kubelet-bootstrap.kubeconfig
+# 查看
+kubectl describe clusterrolebinding cluster-system-anonymous
+kubectl describe clusterrolebinding kubelet-bootstrap
+
 
 
 ### 3. kube-proxy 安装配置
