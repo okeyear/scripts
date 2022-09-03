@@ -264,3 +264,12 @@ kubectl apply -f calico.yaml
 # 验证
 kubectl get pods -A
 
+### 5. coredns
+git clone https://github.com/coredns/deployment.git
+cd deployment/kubernetes/
+./deploy.sh -i 10.96.0.2 | kubectl apply -f -
+
+### 6. verify cluster
+
+
+
