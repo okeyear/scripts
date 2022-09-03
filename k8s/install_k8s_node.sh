@@ -139,7 +139,7 @@ sudo tee /etc/kubernetes/kubelet.conf.json <<EOF
             "clientCAFile": "/etc/kubernetes/pki/ca.pem"
         }
     },
-    "Webhook": {
+    "webhook": {
         "enabled": true,
         "cacheTTL": "2m0s"
     },
