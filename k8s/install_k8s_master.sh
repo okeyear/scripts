@@ -21,7 +21,7 @@ for NODE in $MasterNodes
 do 
     echo scp on $NODE; 
     ssh $SUDO_USER@$NODE 'sudo mkdir -p /etc/kubernetes/pki /var/log/kubernetes';     
-    # 用rsync替代scp,解决目标机器 需要sudu权限的问题
+    # 用rsync替代scp,解决目标机器 需要sudu权限的问题.master几点如果不跑负载, 不需要拷贝kubelet, kube-proxy过去;
     rsync -av --progress --rsync-path="sudo rsync" /usr/local/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy} $SUDO_USER@$NODE:/usr/local/bin/; 
     rsync -av --progress  --rsync-path="sudo rsync" token.csv ca.pem ca-key.pem kube-apiserver-key.pem kube-apiserver.pem $SUDO_USER@$NODE:/etc/kubernetes/pki; 
 done
