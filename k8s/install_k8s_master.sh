@@ -177,7 +177,6 @@ KUBE_CONTROLLER_MANAGER_OPTS="      --port=10252 \
     --alsologtostderr=true \
     --logtostderr=false \
     --log-dir=/var/log/kubernetes \
-    --master=127.0.0.1:8080 \
     --address=127.0.0.1 \
     --tls-cert-file=/etc/kubernetes/pki/kube-controller-manager.pem \
     --tls-private-key-file=/etc/kubernetes/pki/kube-controller-manager-key.pem \
@@ -201,6 +200,7 @@ KUBE_CONTROLLER_MANAGER_OPTS="      --port=10252 \
     --service-cluster-ip-range=10.96.0.0/12  \
     --node-cidr-mask-size=24 "
 EOF
+#     --master=127.0.0.1:8080 \
 
 sudo tee /usr/lib/systemd/system/kube-controller-manager.service <<EOF
 [Unit]
