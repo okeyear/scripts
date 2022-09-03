@@ -78,6 +78,9 @@ kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bo
 kubectl describe clusterrolebinding cluster-system-anonymous
 kubectl describe clusterrolebinding kubelet-bootstrap
 
+# kubelet配置文件
+
+
 
 
 ### 3. kube-proxy 安装配置
