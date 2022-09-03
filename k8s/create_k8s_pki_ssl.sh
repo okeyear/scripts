@@ -36,15 +36,13 @@ sudo tee ca-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ],
+    }],
   "CA": {
     "expiry": "87600h"
   }
@@ -104,15 +102,13 @@ sudo tee etcd-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
@@ -151,15 +147,13 @@ sudo tee kube-apiserver-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
@@ -194,15 +188,13 @@ sudo tee admin-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
@@ -227,15 +219,13 @@ sudo tee kube-controller-manager-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
@@ -260,15 +250,13 @@ sudo tee kube-scheduler-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
@@ -288,15 +276,13 @@ sudo tee kube-proxy-csr.json <<EOF
     "algo": "rsa",
     "size": 2048
   },
-  "names": [
-    {
+  "names": [{
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
       "O": "$O",
       "OU": "$OU"
-    }
-  ]
+    }]
 }
 EOF
 
