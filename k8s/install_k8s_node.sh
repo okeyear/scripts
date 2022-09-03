@@ -78,42 +78,6 @@ kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bo
 kubectl describe clusterrolebinding cluster-system-anonymous
 kubectl describe clusterrolebinding kubelet-bootstrap
 
-# kubelet配置文件
-sudo tee kubelet.conf.json <<EOF
-{
-    "kind": "KubeletConfiguration",
-    "apiVersion": "kubelet.config.k8s.io/v1beta1",
-    "authentication": {
-        "x509": {
-            "clientCAFile": "/etc/kubernetes/pki/ca.pem"
-        }
-    },
-    "webhook": {
-        "enabled": true,
-        "cacheTTL": "2m0s"
-    },
-    "anonymous": {
-        "enabled": false
-    },
-    "authorization": {
-        "mode": "webhook",
-        "webhook": {
-            "cacheAuthorizedTTL": "5m0s",
-            "cacheUnauthorizedTTL": "30s"
-        }
-    },
-    "address": "$(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}')",
-    "port": 10250,
-    "readOnlyPort": 10255,
-    "cgroupDriver": "systemd",
-    "hairpinMode": "promiscuous-bridge",
-    "serializeImagePulls": false,
-    "clusterDomain": "cluster.local",
-    "clusterDNS": [
-        "10.96.0.2"
-    ]
-}
-EOF
 
 # 创建kubelet服务管理文件
 
@@ -153,7 +117,6 @@ EOF
 
 #### 拷贝到本级对应目录
 sudo cp kubelet-bootstrap.kubeconfig /etc/kubernetes/
-sudo cp kubelet.conf.json /etc/kubernetes/
 sudo cp kubelet.service /usr/lib/systemd/system/
 
 # 同步到其他节点
@@ -161,11 +124,48 @@ MasterNodes='k8s-master02 k8s-master03'
 for NODE in $MasterNodes
 do 
     echo scp on $NODE;   
-    rsync -av --progress --rsync-path="sudo rsync" kubelet.conf.json kubelet-bootstrap.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
+    rsync -av --progress --rsync-path="sudo rsync" kubelet-bootstrap.kubeconfig $SUDO_USER@$NODE:/etc/kubernetes/    
     rsync -av --progress --rsync-path="sudo rsync" kubelet.service $SUDO_USER@$NODE:/usr/lib/systemd/system/
 done
 
 # 所有节点
+# kubelet配置文件
+sudo tee /etc/kubernetes/kubelet.conf.json <<EOF
+{
+    "kind": "KubeletConfiguration",
+    "apiVersion": "kubelet.config.k8s.io/v1beta1",
+    "authentication": {
+        "x509": {
+            "clientCAFile": "/etc/kubernetes/pki/ca.pem"
+        }
+    },
+    "webhook": {
+        "enabled": true,
+        "cacheTTL": "2m0s"
+    },
+    "anonymous": {
+        "enabled": false
+    },
+    "authorization": {
+        "mode": "webhook",
+        "webhook": {
+            "cacheAuthorizedTTL": "5m0s",
+            "cacheUnauthorizedTTL": "30s"
+        }
+    },
+    "address": "$(grep "$(hostname)" /etc/hosts| grep -v ^127 | awk '{print $1}')",
+    "port": 10250,
+    "readOnlyPort": 10255,
+    "cgroupDriver": "systemd",
+    "hairpinMode": "promiscuous-bridge",
+    "serializeImagePulls": false,
+    "clusterDomain": "cluster.local",
+    "clusterDNS": [
+        "10.96.0.2"
+    ]
+}
+EOF
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now kubelet
 
