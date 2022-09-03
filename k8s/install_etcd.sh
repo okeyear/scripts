@@ -55,11 +55,11 @@ sudo tee /etc/etcd/etcd.conf <<EOF
 # ETCD_HEARTBEAT_INTERVAL=1000
 ETCD_NAME=$(grep "$(hostname)" /etc/hosts | grep -o 'etcd[0-9]*')
 ETCD_DATA_DIR="/var/lib/etcd"
-ETCD_LISTEN_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2380" 
+ETCD_LISTEN_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | grep -o 'etcd[0-9]*'):2380" 
 ETCD_LISTEN_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2379,https://127.0.0.1:2379"
 #[cluster]
-ETCD_INITIAL_ADVERTISE_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2380"
-ETCD_ADVERTISE_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2379"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | grep -o 'etcd[0-9]*'):2380"
+ETCD_ADVERTISE_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | grep -o 'etcd[0-9]*'):2379"
 ETCD_INITIAL_CLUSTER="$(awk '/etcd/{printf $3"=https://"$1":2380,"}' /etc/hosts | sed 's/,$//')"
 ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
 ETCD_INITIAL_CLUSTER_STATE="new"
@@ -81,6 +81,7 @@ Type=notify
 WorkingDirectory=/var/lib/etcd
 EnvironmentFile=-/etc/etcd/etcd.conf
 ExecStart=/usr/local/bin/etcd \
+  --data-dir="/var/lib/etcd" \
   --cert-file=/etc/etcd/ssl/etcd.pem \
   --key-file=/etc/etcd/ssl/etcd-key.pem \
   --peer-cert-file=/etc/etcd/ssl/etcd.pem \
@@ -89,7 +90,10 @@ ExecStart=/usr/local/bin/etcd \
   --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem \
   --peer-client-cert-auth \
   --client-cert-auth \
-  --auto-tls \
+  --auto-compaction-mode=periodic \
+  --auto-compaction-retention=1 \
+  --max-request-bytes=33554432 \
+  --quota-backend-bytes=6442450944 \
   --heartbeat-interval 1000 \
   --election-timeout 5000
 
@@ -100,6 +104,8 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 EOF
+
+#   --wal-dir=/data/k8s/etcd/wal \
 # 启动etcd服务
 sudo systemctl daemon-reload
 sudo systemctl enable --now etcd.service
