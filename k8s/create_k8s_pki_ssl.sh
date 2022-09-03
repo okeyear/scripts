@@ -254,8 +254,8 @@ sudo tee kube-scheduler-csr.json <<EOF
       "C": "$C",
       "ST": "$ST",
       "L": "$L",
-      "O": "$O",
-      "OU": "$OU"
+      "O": "system:kube-scheduler",
+      "OU": "system"
     }]
 }
 EOF
