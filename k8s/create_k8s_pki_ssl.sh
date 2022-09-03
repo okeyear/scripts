@@ -116,6 +116,8 @@ cfssl gencert -ca=ca.pem \
     -config=ca-config.json \
     -profile=kubernetes etcd-csr.json | cfssljson -bare etcd
 
+#  openssl x509 -in /etc/etcd/ssl/etcd.pem -text -noout
+
 
 ### 4. kube-apiserver CSR
 # 当前IP地址, 预留一些以后用, 这里只需要master, etcd, lb即可, node节点IP没必要写进去
