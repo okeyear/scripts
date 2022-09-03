@@ -189,9 +189,6 @@ kubectl config set-context default --cluster=kubernetes --user=kubelet-proxy --k
 # 使用默认上下文
 kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
 
-
-
-
 sudo tee kube-proxy.service <<EOF
 [Unit]
 Description=Kubernetes Kube-Proxy Server
@@ -255,4 +252,15 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now kube-proxy
+
+
+### 4. calico 网络
+# wget -c https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
+# grep CALICO_IPV4POOL_CIDR -C2 calico.yaml
+
+sudo sed -i 's/#   value: "192.168./  value: "10.244./' calico.yaml
+sudo sed -i '/CALICO_IPV4POOL_CID/s/# //' calico.yaml
+kubectl apply -f calico.yaml
+# 验证
+kubectl get pods -A
 
