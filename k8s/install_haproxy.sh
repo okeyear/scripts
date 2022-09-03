@@ -93,7 +93,8 @@ vrrp_script chk_haproxy {
 }
 
 vrrp_instance VI_1 {
-  interface $(cd /sys/class/net/; echo e*)
+  # interface $(cd /sys/class/net/; echo e*)
+  interface $(ip -o -4 a | grep $(grep "$(hostname)" /etc/hosts | awk '{print $1}') | awk '{print $2}')
   state $([ "$( grep "$(hostname)" /etc/hosts| grep -c etcd01)" -eq 1 ] && echo MASTER || echo BACKUP ) # MASTER # backup节点设为BACKUP
   virtual_router_id 51 # id设为相同，表示是同一个虚拟路由组
   priority $([ "$( grep "$(hostname)" /etc/hosts| grep -c etcd01)" -eq 1 ]  ] && echo 100 || echo 99 ) #初始权重
