@@ -168,11 +168,10 @@ sudo tee kube-apiserver-csr.json <<EOF
 }
 EOF
 
-# 签发证书, 注意 hostname加etcd的地址ip1,ip2..ipn
+# 签发证书, 注意?? 是否需要加 hostname加etcd的地址ip1,ip2..ipn
 cfssl gencert -ca=ca.pem \
     -ca-key=ca-key.pem \
     -config=ca-config.json \
-    -hostname=$(awk '/etcd/{printf $1","}' /etc/hosts | sed 's/,$//') \
     -profile=kubernetes kube-apiserver-csr.json | cfssljson -bare kube-apiserver
 # kube-apiserver-key.pem  kube-apiserver.csr  kube-apiserver.pem
 
