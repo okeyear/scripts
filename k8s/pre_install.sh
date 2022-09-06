@@ -38,7 +38,7 @@ case $ID in
 		export PM='yum' 
 		# set mirrors
 		sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-		  -e 's|^# baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
+		  -e 's|^#.*baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
 		  -i.bak \
 		  /etc/yum.repos.d/almalinux*.repo
 		  ;;
