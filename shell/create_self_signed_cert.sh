@@ -3,6 +3,14 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
 set -e
 
+# 3 Ways to create self_signed_cert:
+# 1. easyrsa
+# 2. cfssl
+# 3. openssl
+#   3.1 openssl v1 (current shell script)
+#   3.2 openssl v3
+
+
 # if arg number is 0, print the help info
 if [ "$#" -eq 0 ] ; then
 	echo "Usage: sudo bash $0 '/C=CN/ST=Beijing/L=Beijing/O=devops/OU=devops/CN=www.devops.com.cn'"
