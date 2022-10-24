@@ -11,7 +11,8 @@ function get_github_latest_release() {
     sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
 }
 
-# install terraform
+# 1. install terraform
+
 terraform_ver="$(get_github_latest_release hashicorp/terraform)"
 # https://releases.hashicorp.com/terraform/1.3.3/terraform_1.3.3_linux_amd64.zip
 curl -kLO https://releases.hashicorp.com/terraform/${terraform_ver/v/}/terraform_${terraform_ver/v/}_linux_amd64.zip
@@ -19,7 +20,9 @@ unzip terraform_${terraform_ver/v/}_linux_amd64.zip
 sudo install -m 755 terraform /bin/
 rm -f terraform_${terraform_ver/v/}_linux_amd64.zip # terraform
 
-# install huaweicloud provide & plugin 
+
+# 2. install huaweicloud provide & plugin 
+
 # https://support.huaweicloud.com/terraform_faq/index.html
 # https://github.com/huaweicloud/terraform-provider-huaweicloud
 huaweicloud_provider_ver="$(get_github_latest_release huaweicloud/terraform-provider-huaweicloud)"
@@ -29,7 +32,9 @@ curl -kLO "https://github.com/huaweicloud/terraform-provider-huaweicloud/release
 unzip "terraform-provider-huaweicloud_${huaweicloud_provider_ver/v/}_linux_amd64.zip"
 rm -f "terraform-provider-huaweicloud_${huaweicloud_provider_ver/v/}_linux_amd64.zip"
 
-# install vsphere provide & plugin  
+
+# 3. install vsphere provide & plugin  
+
 # https://github.com/hashicorp/terraform-provider-vsphere
 : <EOF
 vsphere_provider_ver="$(get_github_latest_release hashicorp/terraform-provider-vsphere)"
