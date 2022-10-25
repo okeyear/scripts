@@ -49,7 +49,16 @@ function prepare_install() {
   done
 }
 
-# 3. shell begin
+# 3. get latest github release version
+function get_github_latest_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
+# 4. shell begin
+
+
 
 # # functions
 # function get_os(){
