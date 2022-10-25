@@ -57,7 +57,7 @@ function get_github_latest_release() {
 }
 
 # 4. shell begin
-
+# alias wget='timeout 60 $SUDO wget -q'
 
 
 # # functions
