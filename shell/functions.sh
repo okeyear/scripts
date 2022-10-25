@@ -206,6 +206,13 @@ function get_disksize(){
     echo "scale=2;$(echo $(sudo fdisk -l | awk '/^Disk \/dev\/sd/ {printf "%s+",$5}')|sed 's/+$/+0/'| bc)/1024/1024/1024" | bc
 }
 
+# get latest github release version
+function get_github_latest_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
 function get_nfssize(){
     # total nfs sizeGB
     echo "scale=2;$(echo $(df -TP | awk '$2 == "nfs" {printf "%s+",$3}') |sed 's/+$/+0/'| bc)/1024/1024" | bc 2>/dev/nul
