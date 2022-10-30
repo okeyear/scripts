@@ -124,7 +124,7 @@ echo 'export PYTHONSTARTUP=/etc/pythonstartup.py' | sudo tee /etc/profile.d/pyth
 
 function set_sshd(){ 
   # config sshd
-  sshPort=60022
+  sshPort=22
   function Set_SSH(){
     sed -i  '/^#\{,1\}Port/d' /etc/ssh/sshd_config
     echo -e "\nPort ${sshPort}" >> /etc/ssh/sshd_config
