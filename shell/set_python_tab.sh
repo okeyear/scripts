@@ -1,5 +1,5 @@
 #!/bin/bash
-cat <<EOF | sudo tee /etc/pythonstartup
+sudo tee /etc/pythonstartup.py <<EOF
 # install readline http://newcenturycomputers.net/projects/readline.html
 # python startup file
 import sys
@@ -20,5 +20,5 @@ atexit.register(readline.write_history_file, histfile)
 del os, histfile, readline, rlcompleter 
 EOF
 
-echo 'export PYTHONSTARTUP=/etc/pythonstartup' | sudo tee -a ~/.bash_profile
+echo 'export PYTHONSTARTUP=/etc/pythonstartup.py' | sudo tee /etc/profile.d/pythonstartup.sh
 # for windows:     pythonstartupf=path/pythonstartup.py
