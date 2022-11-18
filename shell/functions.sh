@@ -1,6 +1,6 @@
 #!/bin/bash
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
-export LANG=en
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+# export LANG=en
 set -e
 # stty erase ^H
 ###########
