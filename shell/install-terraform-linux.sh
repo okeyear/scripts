@@ -26,3 +26,6 @@ echo 'plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"' | tee ~/.terraformrc
 # cleanup
 rm -f "terraform_${terraform_ver}_linux_amd64.zip"
 rm -f "terraform-provider-bigip_${terraform_provide_ver}_linux_amd64.zip"
+
+# set PATH
+export PATH=$PATH:~/bin

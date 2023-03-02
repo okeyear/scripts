@@ -22,3 +22,6 @@ echo 'plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"' | Tee-Object $HOME/.
 # cleanup
 rm "terraform_${terraform_ver}_windows_amd64.zip"
 rm "terraform-provider-bigip_${terraform_provide_ver}_windows_amd64.zip"
+
+# set PATH
+Set-ItemProperty -path HKCU:\Environment\ -Name Path -Value "$((Get-ItemProperty -path HKCU:\Environment\ -Name Path).Path);$HOME\bin"
