@@ -352,10 +352,14 @@ function print_line() {
 
 
 ###RRRR###
-
-
-
-
+function restore_userhome(){
+	username=$1
+	sudo chmod 755 /home
+	sudo chown root.root /home
+	sudo cp -a /etc/skel /home/${username}
+	sudo chmod 700 /home/${username}/
+	sudo chown -R ${username}:${username} /home/${username}/
+}
 
 
 ###SSSS###
