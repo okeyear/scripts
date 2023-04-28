@@ -142,6 +142,7 @@ function set_sshd(){
 #   # mount webdav
 #   yum install -y davfs2 
 #   sed -i '/ignore_dav_header/c ignore_dav_header 1' /etc/davfs2/davfs2.conf
+#   sed -i '/cache_size/acache_size      512' /etc/davfs2/davfs2.conf
 #   mkdir -pv /data/backup/
 #   echo 'https://dav.jianguoyun.com/dav/ /data/backup/ davfs user,noauto,file_mode=600,dir_mode=700 0 1' >> /etc/fstab
 #   # mount /data/backup/
