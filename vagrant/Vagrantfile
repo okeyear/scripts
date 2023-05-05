@@ -56,7 +56,6 @@ Vagrant.configure(2) do |config|
         v.vmx["memsize"] = c.fetch('memory')
         v.vmx["numvcpus"] = c.fetch('cpus')
         v.linked_clone = true
-        v.name = hostname
         v.gui = true
       end
       # hyper-v
