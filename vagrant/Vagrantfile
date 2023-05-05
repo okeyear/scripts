@@ -70,7 +70,7 @@ Vagrant.configure(2) do |config|
         v.cpus = c.fetch('cpus')
         v.maxmemory = c.fetch('memory')
         v.memory = "512"
-        v.name = hostname
+        v.vmname = hostname
       end
       # box的IP配置
       server.vm.network "private_network", ip: IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s
@@ -103,7 +103,6 @@ Vagrant.configure(2) do |config|
         v.vmx["memsize"] = c.fetch('memory')
         v.vmx["numvcpus"] = c.fetch('cpus')
         v.linked_clone = true
-        v.name = hostname
         v.gui = true
       end
       # hyper-v
@@ -118,7 +117,7 @@ Vagrant.configure(2) do |config|
         v.cpus = c.fetch('cpus')
         v.maxmemory = c.fetch('memory')
         v.memory = "512"
-        v.name = hostname
+        v.vmname = hostname
       end
       # box的IP配置
       node.vm.network "private_network", ip: IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
