@@ -218,36 +218,11 @@ function get_nfssize(){
     echo "scale=2;$(echo $(df -TP | awk '$2 == "nfs" {printf "%s+",$3}') |sed 's/+$/+0/'| bc)/1024/1024" | bc 2>/dev/nul
 }
 
-function get_os(){
-    # get OS major version, minor version, ID , relaserver
-    # rpm -q --qf %{version} $(rpm -qf /etc/issue)
-    # rpm -E %{rhel} # supported on rhel 6 , 7 , 8
-    # python -c 'import yum, pprint; yb = yum.YumBase(); pprint.pprint(yb.conf.yumvar["releasever"])'
-    if [ -r /etc/os-release ]; then
-        OS=$(. /etc/os-release && echo "$ID")
-        OSver=$(. /etc/os-release && echo "$VERSION_ID")
-    else
-        OS=$(ls /etc/{*-release,issue}| xargs grep -Eoi 'Centos|Oracle|Debian|Ubuntu|Red\ hat' | awk -F":" 'gsub(/[[:blank:]]*/,"",$0){print $NF}' | sort -uf|tr '[:upper:]' '[:lower:]')
-        OSver=$([ -f /etc/${OS}-release ] && \grep -oE "[0-9.]+" /etc/${OS}-release || \grep -oE "[0-9.]+" /etc/issue)
-    fi
-    OSVer=${OSver%%.*}
-    OSmajor="${OSver%%.*}"
-    OSminor="${OSver#$OSmajor.}"
-    OSminor="${OSminor%%.*}"
-    OSpatch="${OSver#$OSmajor.$OSminor.}"
-    OSpatch="${OSpatch%%[-.]*}"
-    # Package Manager:  yum / apt
-    case $OS in 
-        centos|redhat|oracle|ol|rhel) PM='yum' ;;
-        debian|ubuntu) PM='apt' ;;
-        *) echo -e "\e[0;31mNot supported OS\e[0m, \e[0;32m${OS}\e[0m" ;;
-    esac
-    echo -e "\e[0;32mOS: $OS, OSver: $OSver, OSVer: $OSVer, OSmajor: $OSmajor\e[0m"
-}
 
 function get_publicip() {
     # get public IP
-    curl ip.sb
+    curl ifconfig.me # -x http://proxy:port
+    # curl ip.sb
     # curl -m 10 -s http://members.3322.org/dyndns/getip
     # local IP=$(curl -m 10 -s "ipinfo.io" | awk -F"\"" 'NR==2 {print $(NF-1)}')
 }
@@ -405,80 +380,81 @@ function set_timezone(){
 
 ###TTTT###
 
-function Tar(){  
-    # 根据文件类型解压 
-    [ $# -ne 1 ] && return 1
-    local extension=''
-    local filename=$1
-    case ${filename} in  
-            *.tar.bz2)   
-            extension='tar.bz2'     
-            tar -xjf ${filename}    
-            ;;  
-        *.tbz2)      
-            extension='tbz2'     
-            tar -xjf ${filename}         
-            ;;  
-        *.tar.Z)      
-            extension='tar.Z'     
-            tar -xZf ${filename}         
-            ;;  
-        *.tar.gz)    
-            extension='tar.gz'     
-            tar -xzf ${filename}       
-            ;;  
-        *.tar.xz)    
-            extension='tar.xz'     
-            tar -xJf ${filename}       
-            ;;  
-        *.tgz)       
-            extension='tgz'     
-            tar -xzf ${filename}       
-            ;; 
-        *.bz2)       
-            extension='bz2'     
-            bunzip2 ${filename}         
-            ;;  
-        *.rar)       
-            extension='rar'     
-            unrar e ${filename}       
-            ;;  
-        *.gz)        
-            extension='gz'     
-            gunzip ${filename}       
-            ;;  
-        *.tar)       
-            extension='tar'     
-            tar -xf ${filename}           
-            ;;  
-        *.zip)       
-            extension='zip'     
-            unzip ${filename}    
-            ;;  
-        *.Z)         
-            extension='Z'     
-            uncompress ${filename}    
-            ;;  
-        *.7z)        
-            extension='7z'     
-            7z x ${filename}      
-            ;;  
-        *.xz)        
-            extension='xz'     
-            xz -d ${filename}      
-            ;;  
-        *)           
-            echo -e "${filename}   cannot  Uncompress by Tar()\n\e[0;31;5mUsage: Tar tarball\e[0m" 
-            return 1
-            ;;  
-    esac  
-    # 检查文件后缀名，cd目标路径
-    local filename1=${filename%\.${extension}}
-    # echo "$filename1   $filename "
-    cd  ./${filename1}
-    pwd
-    [ -f ./configure ] && ./configure  || ./config
-}
+# function Tar(){  
+#     # tar会自动根据类型解压，这个函数已经没用，淘汰掉
+#     # 根据文件类型解压 
+#     [ $# -ne 1 ] && return 1
+#     local extension=''
+#     local filename=$1
+#     case ${filename} in  
+#             *.tar.bz2)   
+#             extension='tar.bz2'     
+#             tar -xjf ${filename}    
+#             ;;  
+#         *.tbz2)      
+#             extension='tbz2'     
+#             tar -xjf ${filename}         
+#             ;;  
+#         *.tar.Z)      
+#             extension='tar.Z'     
+#             tar -xZf ${filename}         
+#             ;;  
+#         *.tar.gz)    
+#             extension='tar.gz'     
+#             tar -xzf ${filename}       
+#             ;;  
+#         *.tar.xz)    
+#             extension='tar.xz'     
+#             tar -xJf ${filename}       
+#             ;;  
+#         *.tgz)       
+#             extension='tgz'     
+#             tar -xzf ${filename}       
+#             ;; 
+#         *.bz2)       
+#             extension='bz2'     
+#             bunzip2 ${filename}         
+#             ;;  
+#         *.rar)       
+#             extension='rar'     
+#             unrar e ${filename}       
+#             ;;  
+#         *.gz)        
+#             extension='gz'     
+#             gunzip ${filename}       
+#             ;;  
+#         *.tar)       
+#             extension='tar'     
+#             tar -xf ${filename}           
+#             ;;  
+#         *.zip)       
+#             extension='zip'     
+#             unzip ${filename}    
+#             ;;  
+#         *.Z)         
+#             extension='Z'     
+#             uncompress ${filename}    
+#             ;;  
+#         *.7z)        
+#             extension='7z'     
+#             7z x ${filename}      
+#             ;;  
+#         *.xz)        
+#             extension='xz'     
+#             xz -d ${filename}      
+#             ;;  
+#         *)           
+#             echo -e "${filename}   cannot  Uncompress by Tar()\n\e[0;31;5mUsage: Tar tarball\e[0m" 
+#             return 1
+#             ;;  
+#     esac  
+#     # 检查文件后缀名，cd目标路径
+#     local filename1=${filename%\.${extension}}
+#     # echo "$filename1   $filename "
+#     cd  ./${filename1}
+#     pwd
+#     [ -f ./configure ] && ./configure  || ./config
+# }
 
 
 
@@ -526,19 +502,19 @@ function Tar(){
 
 ###Others###
 
-function os::vm::check(){
-    # 检查实体机还虚拟机，虚拟机什么架构
-    # xen
-    [ -e /proc/xen/capabilities ] && echo 'XEN'
-    # openvz
-    if [ -e /proc/vz ];then
-        [ ！ -e /proc/bc ] && echo 'OPENVZ_CONTAINER' || echo 'OPENVZ_NODE'
-    fi
-    # Virtual or Physical
-    # [ `dmidecode -s system-product-name | wc -l ` -eq 0 ] && echo 'XEN' && dmidecode -s system-product-name
-    [ -e /usr/sbin/virt-what ] && /usr/sbin/virt-what || echo "Please install virt-what package."
-}
-
+# 检查系统物理机还是虚拟机还是容器，可以用virt-what和systemd-detect-virt， 下面部分也没用了
+# function os::vm::check(){
+#     # 检查实体机还虚拟机，虚拟机什么架构
+#     # xen
+#     [ -e /proc/xen/capabilities ] && echo 'XEN'
+#     # openvz
+#     if [ -e /proc/vz ];then
+#         [ ！ -e /proc/bc ] && echo 'OPENVZ_CONTAINER' || echo 'OPENVZ_NODE'
+#     fi
+#     # Virtual or Physical
+#     # [ `dmidecode -s system-product-name | wc -l ` -eq 0 ] && echo 'XEN' && dmidecode -s system-product-name
+#     [ -e /usr/sbin/virt-what ] && /usr/sbin/virt-what || echo "Please install virt-what package."
+# }
 # function install_virt_what(){
 #     yum install -y gcc gcc-c++ gdb
 #     Virt_What_Ver=$(wget -qO- https://people.redhat.com/~rjones/virt-what/files/ | grep -o 'virt-what-1\.[0-9]\{,2\}' | sort -V | uniq | tail -1)

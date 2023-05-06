@@ -1,8 +1,9 @@
-#!/usr/bash
+#!/bin/bash
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
-set -e
 
+# exit shell when error
+# set -e
 
 # 1. If User is root or sudo install
 # if [ $(id -u) -eq 0 ]; then
@@ -55,12 +56,50 @@ function get_github_latest_release() {
     sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
 }
 
-# 4. shell begin
-# alias wget='timeout 60 wget -q'
+# 4. check OS platform, bareMetal/vm/container
+# https://www.man7.org/linux/man-pages/man1/systemd-detect-virt.1.html
+if [ "$(systemd-detect-virt)x" == "vmwarex" ] ; then
+    echo 
+else
+    echo     
+fi
+
+# 5. get OS release and version
+# OS: release, ubuntu centos oracle rhel debian alpine,etc
+# OSver: small version, 6.10, 7.9, 22.04, etc
+# OSVer: big   version, 6 7 8 9 20 22, etc
+function get_os(){
+    # get OS major version, minor version, ID , relaserver
+    # rpm -q --qf %{version} $(rpm -qf /etc/issue)
+    # rpm -E %{rhel} # supported on rhel 6 , 7 , 8
+    # python -c 'import yum, pprint; yb = yum.YumBase(); pprint.pprint(yb.conf.yumvar["releasever"])'
+    if [ -r /etc/os-release ]; then
+        OS=$(. /etc/os-release && echo "$ID")
+        OSver=$(. /etc/os-release && echo "$VERSION_ID")
+    elif  test -x /usr/bin/lsb_release; then
+        /usr/bin/lsb_release -i 2>/dev/null
+        echo 
+    else
+        OS=$(ls /etc/{*-release,issue}| xargs grep -Eoi 'Centos|Oracle|Debian|Ubuntu|Red\ hat' | awk -F":" 'gsub(/[[:blank:]]*/,"",$0){print $NF}' | sort -uf|tr '[:upper:]' '[:lower:]')
+        OSver=$([ -f /etc/${OS}-release ] && \grep -oE "[0-9.]+" /etc/${OS}-release || \grep -oE "[0-9.]+" /etc/issue)
+    fi
+    OSVer=${OSver%%.*}
+    OSmajor="${OSver%%.*}"
+    OSminor="${OSver#$OSmajor.}"
+    OSminor="${OSminor%%.*}"
+    OSpatch="${OSver#$OSmajor.$OSminor.}"
+    OSpatch="${OSpatch%%[-.]*}"
+    # Package Manager:  yum / apt
+    case $OS in 
+        centos|redhat|oracle|ol|rhel) PM='yum' ;;
+        debian|ubuntu) PM='apt' ;;
+        *) echo -e "\e[0;31mNot supported OS\e[0m, \e[0;32m${OS}\e[0m" ;;
+    esac
+    echo -e "\e[0;32mOS: $OS, OSver: $OSver, OSVer: $OSVer, OSmajor: $OSmajor\e[0m"
+}
 
 
-# # functions
-# function get_os(){
+# function get_rhel_os(){
 #     # get OS major version, minor version, ID , relaserver
 #     local wrong_msg="\e[0;31mUnsupported Linux OS, Only support rhel (based) 6 7 8 9 \e[0m"
 #     # if [ -r /etc/redhat-release ] || [ -r /etc/centos-release ] || [ -r /etc/oracle-release ] || [ -r  /etc/almalinux-release ] ; then
@@ -79,4 +118,10 @@ function get_github_latest_release() {
 #     esac
 # }
 # # Unsupported, the script will exit.
-# # get_os
+# # get_rhel_os
+
+
+
+# 6. shell begin
+# alias wget='timeout 60 wget -q --progress=bar:force --limit-rate=200k '
+
