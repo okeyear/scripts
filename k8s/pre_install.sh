@@ -149,32 +149,32 @@ sudo sysctl --system
 # 10. ipvsadm 
 # kube-proxy支持 iptables 和 ipvs 两种模式
 # http://www.linuxvirtualserver.org/software/
-sudo yum install -y ipset ipvsadm ipset sysstat conntrack libseccomp
+sudo yum install -y ipset ipvsadm sysstat conntrack libseccomp
 sudo mkdir -pv /etc/systemd/system/kubelet.service.d
 # kernel 4.19+中 nf_conntrack_ipv4 改为 nf_conntrack
 cat <<EOF | sudo tee /etc/modules-load.d/ipvs.conf
 ip_vs
-ip_vs_lc
-ip_vs_wlc
+# ip_vs_lc
+# ip_vs_wlc
 ip_vs_rr
 ip_vs_wrr
-ip_vs_lblc
-ip_vs_lblcr
-ip_vs_dh
+# ip_vs_lblc
+# ip_vs_lblcr
+# ip_vs_dh
 ip_vs_sh
-ip_vs_fo
-ip_vs_nq
-ip_vs_sed
-ip_vs_ftp
-ip_vs_sh
+# ip_vs_fo
+# ip_vs_nq
+# ip_vs_sed
+# ip_vs_ftp
+# ip_vs_sh
 nf_conntrack
-ip_tables
-ip_set
-xt_set
-ipt_set
-ipt_rpfilter
-ipt_REJECT
-ipip
+# ip_tables
+# ip_set
+# xt_set
+# ipt_set
+# ipt_rpfilter
+# ipt_REJECT
+# ipip
 EOF
 # sudo ls /lib/modules/$(uname -r)/kernel/net/netfilter/ipvs|grep -o "^[^.]*" | sudo tee -a /etc/modules-load.d/ipvs.conf
 # systemctl status systemd-modules-load.service
@@ -186,6 +186,14 @@ EOF
 # ExecStartPre=-/sbin/modprobe ip_vs_wrr
 # ExecStartPre=-/sbin/modprobe ip_vs_sh
 # ExecStartPre=-/sbin/modprobe nf_conntrack
+# EOF
+# sudo tee /etc/sysconfig/modules/ipvs.conf <<EOF
+# #!/bin/bash
+# modprobe -- ip_vs
+# modprobe -- ip_vs_rr
+# modprobe -- ip_vs_wrr
+# modprobe -- ip_vs_sh
+# modprobe -- nf_conntrack
 # EOF
 
 # after reboot, check below:
