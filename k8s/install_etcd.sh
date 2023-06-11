@@ -61,7 +61,7 @@ ETCD_LISTEN_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $
 ETCD_INITIAL_ADVERTISE_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2380"
 ETCD_ADVERTISE_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2379"
 ETCD_INITIAL_CLUSTER="$(awk '/etcd/{printf $3"=https://"$1":2380,"}' /etc/hosts | sed 's/,$//')"
-ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
+ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster-token"
 ETCD_INITIAL_CLUSTER_STATE="new"
 EOF
 
