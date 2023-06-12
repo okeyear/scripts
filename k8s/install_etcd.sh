@@ -5,7 +5,7 @@ export LANG=en
 
 ### 1. on etcd01/k8s-master01
 ## 下载 解压etcd https://github.com/etcd-io/etcd/releases
-export ETCD_VER='v3.4.20'
+export ETCD_VER='v3.5.9'
 sudo tar -xf etcd-${ETCD_VER}-linux-amd64.tar.gz --strip-components=1 -C /usr/local/bin etcd-${ETCD_VER}-linux-amd64/etcd{,ctl}
 etcd --version
 etcdctl version
