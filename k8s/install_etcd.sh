@@ -19,6 +19,7 @@ sudo cp etcd*.pem /etc/etcd/ssl/
 
 
 # 发送组件到其他节点
+sudo yum install -y rsync
 Nodes='etcd02 etcd03'
 for NODE in $Nodes
 do 
@@ -26,6 +27,7 @@ do
     # scp /usr/local/bin/etcd* $NODE:/usr/local/bin/; 
     # 用rsync替代scp,解决目标机器 需要sudu权限的问题
     # 部分证书没同步过去,还有问题,待测试, 可能需要手工传 /etc/etcd/ssl/etcd-key.pem
+    SUDO_USER='vagrant'
     ssh $SUDO_USER@$NODE "sudo mkdir -p /etc/etcd/ssl /var/lib/etcd /var/lib/etcd"
     ssh $SUDO_USER@$NODE "sudo yum install -yq rsync"
     rsync -av --progress --rsync-path="sudo rsync" /usr/local/bin/etcd* $SUDO_USER@$NODE:/usr/local/bin/; 
@@ -60,7 +62,8 @@ ETCD_LISTEN_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $
 #[cluster]
 ETCD_INITIAL_ADVERTISE_PEER_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2380"
 ETCD_ADVERTISE_CLIENT_URLS="https://$(grep "$(hostname)" /etc/hosts | awk '{print $1}'):2379"
-ETCD_INITIAL_CLUSTER="$(awk '/etcd/{printf $3"=https://"$1":2380,"}' /etc/hosts | sed 's/,$//')"
+# notice: hostname & ip position in /etc/hosts
+ETCD_INITIAL_CLUSTER="$(awk '/etcd/{printf $2"=https://"$1":2380,"}' /etc/hosts | sed 's/,$//')"
 ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster-token"
 ETCD_INITIAL_CLUSTER_STATE="new"
 EOF
