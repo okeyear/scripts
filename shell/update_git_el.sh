@@ -1,3 +1,12 @@
+#!/bin/bash
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+# export LANG=en
+# set -e
+# stty erase ^H
+###########
+
+sudo yum install -yq gcc glibc make openssl-devel
+
 # 1. get the latest git version
 git_ver=$(curl --silent "https://api.github.com/repos/git/git/tags"  |
     grep '"name"' |  
@@ -6,7 +15,7 @@ git_ver=$(curl --silent "https://api.github.com/repos/git/git/tags"  |
 
 # 2. download tarball
 # https://github.com/git/git/archive/refs/tags/v2.35.1.tar.gz
-curl -sSLO https://github.91chi.fun/https://github.com//git/git/archive/refs/tags/${git_ver}.tar.gz
+curl -sSLO https://github.com//git/git/archive/refs/tags/${git_ver}.tar.gz
 
 # 3. unarchive
 tar -zxf ${git_ver}.tar.gz -C /usr/local/src/
