@@ -5,7 +5,7 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 # stty erase ^H
 ###########
 
-sudo yum install -yq gcc glibc make openssl-devel expat-devel
+sudo yum install -yq gcc glibc make autoconf openssl-devel expat-devel
 
 # 1. get the latest git version
 git_ver=$(curl --silent "https://api.github.com/repos/git/git/tags"  |
