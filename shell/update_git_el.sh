@@ -31,9 +31,13 @@ make install
 
 # 5. PATH env, 下次升级更新版本, 把最后的200, 改成更高优先级即可
 alternatives --install /usr/local/git/latest git /usr/local/git/git-${git_ver/v/} 300
+echo 'export PATH=/usr/local/git/latest/bin:$PATH' | sudo tee /etc/profile.d/git.sh
 
 # chech the git version
-git --version
+/usr/local/git/latest/bin/git --version
+
+# delete old git
+[ -s /usr/local/git/latest/bin/git ] && yum remove -yq git
 
 ### 回滚版本
 # sudo update-alternatives --remove git /usr/local/git/git-${git_ver/v/}
