@@ -26,7 +26,7 @@ EOF
 # yum & dnf
 sudo sed -i '/proxy=/d' /etc/dnf/dnf.conf /etc/yum.conf
 echo "proxy=$MY_PROXY_URL" | sudo tee -a /etc/yum.conf
-# echo "proxy=$MY_PROXY_URL" | sudo tee -a /etc/dnf/dnf.conf
+echo "proxy=$MY_PROXY_URL" | sudo tee -a /etc/dnf/dnf.conf
 
 # curl
 echo "proxy=$MY_PROXY_URL" | tee ~/.curlrc
