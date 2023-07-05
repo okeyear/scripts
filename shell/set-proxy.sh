@@ -28,13 +28,53 @@ sudo sed -i '/proxy=/d' /etc/dnf/dnf.conf /etc/yum.conf
 echo "proxy=$MY_PROXY_URL" | sudo tee -a /etc/yum.conf
 echo "proxy=$MY_PROXY_URL" | sudo tee -a /etc/dnf/dnf.conf
 
+
 # curl
 echo "proxy=$MY_PROXY_URL" | tee ~/.curlrc
 
+
 # wget
-sudo sed -i '/^[a-z]*_proxy = /d' /etc/wgetrc
-sudo tee -a /etc/wgetrc <<EOF
+sudo sed -i '/^[a-z]*_proxy = /d' ~/.wgetrc # /etc/wgetrc
+sudo tee -a ~/.wgetrc <<EOF
 http_proxy = $MY_PROXY_URL
 https_proxy = $MY_PROXY_URL
 ftp_proxy = $MY_PROXY_URL
+EOF
+
+
+# git
+tee ~/.gitconfig <<EOF
+[http]
+    proxy = $MY_PROXY_URL
+[https]
+    proxy = $MY_PROXY_URL
+[credential]
+    helper = manager
+[core]
+    quotepath = false
+[gui]
+    encoding = utf-8
+[i18n]
+    commitencoding = utf-8
+    logoutputencoding = gbk
+EOF
+
+
+# python pip
+mkdir $HOME/pip
+tee $HOME/pip/pip.conf <<EOF
+[global]
+index-url = https://mirrors.aliyun.com/pypi/simple
+
+[install]
+trusted-host=mirrors.aliyun.com
+proxy=$MY_PROXY_URL
+EOF
+
+
+# npm
+sudo tee $HOME/.npmrc <<EOF
+https-proxy = "$MY_PROXY_URL"
+proxy = "$MY_PROXY_URL"
+registry = "https://registry.npmmirror.com/"
 EOF
