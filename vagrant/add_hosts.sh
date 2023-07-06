@@ -28,7 +28,7 @@ nodeip_head=${nodeip%.*}
 nodeip_tail=${nodeip##*.}
 for i in $( seq 0 $(($nodecount-1)) )
 do
-    printf "%16s    node-%02d" ${nodeip_head}.$((${nodeip_tail}+i)) $(($i+1)) | sudo tee -a /etc/hosts
+    printf "%-16s    node-%02d" ${nodeip_head}.$((${nodeip_tail}+i)) $(($i+1)) | sudo tee -a /etc/hosts
 done
 
 # sudo reboot
