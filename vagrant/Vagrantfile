@@ -73,7 +73,24 @@ Vagrant.configure(2) do |config|
         v.vmname = hostname
       end
       # box的IP配置
-      server.vm.network "private_network", ip: IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s
+      # server.vm.network "private_network", ip: IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s
+      # passing the variable to shell
+      # https://stackoverflow.com/questions/15461898/passing-variable-to-a-shell-script-provisioner-in-vagrant
+      # set STATIC IP for vagrant default nat network adapter
+      ipaddr=IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s
+      server.vm.provision "shell", run: "always", args: [ ipaddr ], inline: <<-SHELL
+        echo $(date +%FT%T) shell begin
+        # sudo nmcli connection add type ethernet ifname ens32 ipv4.method manual ipv4.addresses 10.10.10.101/24 ipv4.gateway 10.10.10.2 ipv4.dns 223.5.5.5
+        ipaddr=$1
+        sudo nmcli connection add type ethernet \
+          ifname $(cd /sys/class/net/; echo e*) \
+          ipv4.method manual \
+          ipv4.addresses ${ipaddr}/24 \
+          ipv4.gateway ${ipaddr%.*}.2 \
+          ipv4.dns ${ipaddr%.*}.2
+        sudo nmcli con reload
+        echo $(date +%FT%T) shell end
+      SHELL
     end
   end
   
@@ -120,9 +137,29 @@ Vagrant.configure(2) do |config|
         v.vmname = hostname
       end
       # box的IP配置
-      node.vm.network "private_network", ip: IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
+      # node.vm.network "private_network", ip: IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
+      # passing the variable to shell
+      # https://stackoverflow.com/questions/15461898/passing-variable-to-a-shell-script-provisioner-in-vagrant
+      # set STATIC IP for vagrant default nat network adapter
+      ipaddr=IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
+      node.vm.provision "shell", run: "always", args: [ ipaddr ], inline: <<-SHELL
+        echo $(date +%FT%T) shell begin
+        # sudo nmcli connection add type ethernet ifname ens32 ipv4.method manual ipv4.addresses 10.10.10.101/24 ipv4.gateway 10.10.10.2 ipv4.dns 223.5.5.5
+        ipaddr=$1
+        sudo nmcli connection add type ethernet \
+          ifname $(cd /sys/class/net/; echo e*) \
+          ipv4.method manual \
+          ipv4.addresses ${ipaddr}/24 \
+          ipv4.gateway ${ipaddr%.*}.2 \
+          ipv4.dns ${ipaddr%.*}.2
+        sudo nmcli con reload
+        echo $(date +%FT%T) shell end
+      SHELL
     end
   end
+
+  # server和node的hosts配置
+  config.vm.provision "shell", path: "add_hosts.sh", args: [ x.fetch('ip').fetch('server'), x.fetch('server').fetch('count'), x.fetch('ip').fetch('node'), x.fetch('node').fetch('count') ]
 end
 
 
