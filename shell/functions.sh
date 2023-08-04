@@ -201,7 +201,7 @@ function convet_ip2int(){
 }
 
 # Number -> IP address:
-function convet_ip2int(){
+function convet_int2ip(){
     # convert decimal/integer/number to ipaddress
     (export ip=$1; for i in {1..4}; do s='.'$((ip%256))$s && ((ip>>=8)); done; echo ${s:1})
 }
