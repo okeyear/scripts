@@ -194,6 +194,18 @@ function convet_prefix2netmask(){
     eval $(ipcalc  -m 1.1.1.1/${1}) && echo ${NETMASK}
 }
 
+# IP address -> Number:
+function convet_ip2int(){
+    # convert ipaddress to decimal/integer/number
+    echo $1 | tr . '\n' | awk '{s = s*256 + $1} END{print s}'
+}
+
+# Number -> IP address:
+function convet_ip2int(){
+    # convert decimal/integer/number to ipaddress
+    (export ip=$1; for i in {1..4}; do s='.'$((ip%256))$s && ((ip>>=8)); done; echo ${s:1})
+}
+
 function get_crontab(){
     # get all user's crontab
     USER_LIST=`awk 'BEGIN {FS=":"} ($3 >= 500 && $3 != 65534) || $3 == 0   {print $1}' /etc/passwd`
