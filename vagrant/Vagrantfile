@@ -74,6 +74,7 @@ Vagrant.configure(2) do |config|
       end
       # box的IP配置
       # server.vm.network "private_network", ip: IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s
+      # config.vm.network "public_network", ip: IPAddr.new(server_ip.to_i + i - 1, Socket::AF_INET).to_s , netmask: "24", bridge: "veth"
       # passing the variable to shell
       # https://stackoverflow.com/questions/15461898/passing-variable-to-a-shell-script-provisioner-in-vagrant
       # set STATIC IP for vagrant default nat network adapter
@@ -139,8 +140,7 @@ Vagrant.configure(2) do |config|
       end
       # box的IP配置
       # node.vm.network "private_network", ip: IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
-      # passing the variable to shell
-      # https://stackoverflow.com/questions/15461898/passing-variable-to-a-shell-script-provisioner-in-vagrant
+      # config.vm.network "public_network", ip: IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s , netmask: "24", bridge: "veth"
       # set STATIC IP for vagrant default nat network adapter
       ipaddr=IPAddr.new(node_ip.to_i + i - 1, Socket::AF_INET).to_s
       node.vm.provision "shell", run: "always", args: [ ipaddr ], inline: <<-SHELL
@@ -162,6 +162,10 @@ Vagrant.configure(2) do |config|
 
   # server和node的hosts配置
   config.vm.provision "shell", path: "add_hosts.sh", args: [ x.fetch('ip').fetch('server'), x.fetch('server').fetch('count'), x.fetch('ip').fetch('node'), x.fetch('node').fetch('count') ]
+
+  #config.trigger.after :up do |trigger|
+  #...
+  #end
 end
 
 
