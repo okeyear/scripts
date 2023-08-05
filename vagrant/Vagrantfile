@@ -89,6 +89,7 @@ Vagrant.configure(2) do |config|
           ipv4.gateway ${ipaddr%.*}.2 \
           ipv4.dns ${ipaddr%.*}.2
         sudo nmcli con reload
+        sudo nmcli con del $(cd /sys/class/net/; echo e*)
         echo $(date +%FT%T) shell end
       SHELL
     end
@@ -153,6 +154,7 @@ Vagrant.configure(2) do |config|
           ipv4.gateway ${ipaddr%.*}.2 \
           ipv4.dns ${ipaddr%.*}.2
         sudo nmcli con reload
+        sudo nmcli con del $(cd /sys/class/net/; echo e*)
         echo $(date +%FT%T) shell end
       SHELL
     end
