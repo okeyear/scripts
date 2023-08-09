@@ -3,6 +3,13 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
 
 
+# el5
+sudo rpm -ivh https://mirrors.aliyun.com/epel-archive/5/x86_64/highlight-2.6.14-1.el5.x86_64.rpm?spm=a2c6h.25603864.0.0.7ca973d3kPy2uh
+# el6
+sudo rpm -ivh https://mirrors.aliyun.com/epel-archive/6/x86_64/Packages/h/highlight-3.8-1.el6.x86_64.rpm?spm=a2c6h.25603864.0.0.16de7e00YVfptg
+# el7
+# sudo rpm -ivh https://mirrors.aliyun.com/centos/7/os/x86_64/Packages/highlight-3.13-3.el7.x86_64.rpm
+# el7 # el8 # el9 + 内置源中
 sudo yum install -y highlight
 alias cats='highlight -O ansi --syntax=bash'
 echo "alias cats='highlight -O ansi --syntax=bash'"  | sudo tee /etc/profile.d/alias.sh
