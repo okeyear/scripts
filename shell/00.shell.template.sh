@@ -1,6 +1,8 @@
 #!/bin/bash
 export PATH=/snap/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:$PATH
 export LANG=en
+echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
+# source /etc/profile.d/localbin.sh
 
 # exit shell when error
 # set -e
