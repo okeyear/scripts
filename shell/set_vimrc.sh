@@ -2,7 +2,7 @@
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
 set -e
-sudo tee /etc/vimrc  <<EOF
+sudo tee ~/.vimrc  <<EOF
 """"""""""设定默认编码""""""""
 set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
 set termencoding=utf-8
