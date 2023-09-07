@@ -1,4 +1,4 @@
-# echo 'local1.crit  /var/log/bash_history.log' | sudo tee /etc/rsyslog.d/bash_history.conf
+# echo -e 'local1.crit  /var/log/bash_history.log\n & stop' | sudo tee /etc/rsyslog.d/bash_history.conf
 # vim /etc/profile.d/bash_PROMPT_COMMAND.sh
 export HISTSIZE=1000
 export HISTTIMEFORMAT="%F %T "
