@@ -292,9 +292,17 @@ function install_pip(){
 
 ###LLLL###
 
+function list_images() {
+	registry_url=$1
+	for i in $(curl --noproxy '*' -XGET ${registry_url}/v2/_catalog | jq '.repositories[] | tostring')
+	do 
+		printf "%-80s\n" "=" | sed 's/\s/=/g'
+		curl -s --noproxy '*' -XGET ${registry_url}/v2/${i//\"/}/tags/list
+	done
+}
 
-
-
+# list_images http://x.x.x.x:5000
+# list_images http://admin:password@x.x.x.x:5000
 
 
 ###MMMM###
