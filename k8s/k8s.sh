@@ -292,7 +292,7 @@ function download_k8s(){
 # functions main part
 #####################
 
-# require containerd
+# require containerd zstd
 # temp folder
 # trap 'rm -rf "$TMPFILE"' EXIT
 # TMPFILE=$(mktemp -d) || exit 1
