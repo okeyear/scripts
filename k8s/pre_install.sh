@@ -1,7 +1,10 @@
-#!/usr/bin/env bash
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
-export LANG=en
+#!/bin/bash
+export PATH=/snap/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin:~/.local/bin:$PATH
+export LANG=en_US.UTF8
+# exit shell when error
 # set -e
+echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
+source /etc/profile.d/localbin.sh
 # stty erase ^H
 ###################
 # 1. hostname和hosts配置
@@ -16,8 +19,6 @@ export LANG=en
 
 ###################
 # 2. yum repo配置, include docker repo
-echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
-source /etc/profile.d/localbin.sh
 
 if [ -r /etc/os-release ]; then
 	. /etc/os-release
@@ -28,24 +29,24 @@ else
 fi
 
 # Package Manager:  yum / apt / apk
-case $ID in 	
-	centos) 
-		export PM='yum' 
-    sudo curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
-    # curl -sSL https://raw.githubusercontent.com/okeyear/scripts/main/shell/update_kernel_el.sh | sudo sh - 
-		;;
-	almalinux) 
-		export PM='yum' 
-		# set mirrors
-		sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-		  -e 's|^#.*baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
-		  -i.bak \
-		  /etc/yum.repos.d/almalinux*.repo
-		  ;;
-esac
+# case $ID in 	
+# 	centos) 
+# 		export PM='yum' 
+#     sudo curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+#     # curl -sSL https://raw.githubusercontent.com/okeyear/scripts/main/shell/update_kernel_el.sh | sudo sh - 
+# 		;;
+# 	almalinux) 
+# 		export PM='yum' 
+# 		# set mirrors
+# 		sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+# 		  -e 's|^#.*baseurl=https://repo.almalinux.org|baseurl=https://mirrors.aliyun.com|g' \
+# 		  -i.bak \
+# 		  /etc/yum.repos.d/almalinux*.repo
+# 		  ;;
+# esac
 
 
-sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz rsync
+# sudo yum install -y wget vim jq psmisc vim net-tools telnet git yum-utils device-mapper-persistent-data lvm2 lrzsz rsync
 # sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 # echo 'export PATH=$PATH:/usr/local/bin' | sudo tee /etc/profile.d/localbin.sh
 
