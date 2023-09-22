@@ -297,29 +297,52 @@ function download_k8s(){
 # trap 'rm -rf "$TMPFILE"' EXIT
 # TMPFILE=$(mktemp -d) || exit 1
 # cd $TMPFILE
-download_kubeadm
-chmod a+x kubeadm
-k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-k8s_ver=${k8s_ver/v/}
-./kubeadm config print init-defaults --component-configs KubeletConfiguration | sudo tee kubeadm.yml
-# kubernetesVersion: 1.28.0
-sudo sed -i "/kubernetesVersion:/ckubernetesVersion: ${k8s_ver}"  kubeadm.yml
-# ./kubeadm config images list --config kubeadm.yml | sed 's/^/ctr image pull /g'
-./kubeadm config images pull --v=5 --config kubeadm.yml
-# curl -Ls "https://sbom.k8s.io/$(curl -Ls https://dl.k8s.io/release/stable.txt)/release" | grep "SPDXID: SPDXRef-Package-registry.k8s.io" |  grep -v sha256 | cut -d- -f3- | sed 's/-/\//' | sed 's/-v1/:v1/' | grep amd64
-for i in $(./kubeadm config images list --config kubeadm.yml)
-do
-   ctr -n k8s.io images export $(echo ${i/registry.k8s.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
-done
-# calico images
-download_calico
-for i in $(grep 'image:' calico.yaml | awk '{print $2}')
-do
-    ctr -n k8s.io images pull $i
-    ctr -n k8s.io images export $(echo ${i/docker.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
-done
-# yum install -y zstd
-tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
-# clean 
-rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
-# cd -
+
+function download_offline(){
+    # download from registry.k8s.io
+    download_kubeadm
+    chmod a+x kubeadm
+    k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+    k8s_ver=${k8s_ver/v/}
+    ./kubeadm config print init-defaults --component-configs KubeletConfiguration | sudo tee kubeadm.yml
+    # kubernetesVersion: 1.28.0
+    sudo sed -i "/kubernetesVersion:/ckubernetesVersion: ${k8s_ver}"  kubeadm.yml
+    # ./kubeadm config images list --config kubeadm.yml | sed 's/^/ctr image pull /g'
+    ./kubeadm config images pull --v=5 --config kubeadm.yml
+    # curl -Ls "https://sbom.k8s.io/$(curl -Ls https://dl.k8s.io/release/stable.txt)/release" | grep "SPDXID: SPDXRef-Package-registry.k8s.io" |  grep -v sha256 | cut -d- -f3- | sed 's/-/\//' | sed 's/-v1/:v1/' | grep amd64
+    for i in $(./kubeadm config images list --config kubeadm.yml)
+    do
+    ctr -n k8s.io images export $(echo ${i/registry.k8s.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
+    done
+    # calico images
+    download_calico
+    for i in $(grep 'image:' calico.yaml | awk '{print $2}')
+    do
+        ctr -n k8s.io images pull $i
+        ctr -n k8s.io images export $(echo ${i/docker.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
+    done
+    # yum install -y zstd
+    pwd
+    tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
+    # clean 
+    rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
+    # cd -
+}
+
+function download_offlinecn(){
+    # download from aliyun China
+    echo
+}
+
+
+function install_controlplane(){
+    echo
+}
+
+function get_kubeadm_join_cmd(){
+    echo
+}
+
+function install_workernode(){
+    echo
+}
