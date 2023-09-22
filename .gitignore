@@ -1,1 +1,7 @@
-kubenetes.tar.zst
+*.tar
+*.rpm
+*.zst
+*.tar.zst
+kubeadm
+kubeadm.yml
+calico.yaml

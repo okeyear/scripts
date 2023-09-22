@@ -289,7 +289,7 @@ function download_k8s(){
 }
 
 #####################
-# functions main part
+# functions download part
 #####################
 
 # require containerd zstd
@@ -323,10 +323,26 @@ function download_offline(){
     done
     # yum install -y zstd
     pwd
-    tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
+    # tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
     # clean 
-    rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
+    # rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
     # cd -
+
+    # set k8s repo
+    cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/${k8s_ver%.*}/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/${k8s_ver%.*}/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+EOF
+    # download k8s repo rpms
+    sudo yum install -y yum-download yum-plugin-downloadonly createrepo
+    sudo yum install -y --downloadonly --disableexcludes=kubernetes --downloaddir=./kubernetes.repo.rpms kubelet kubeadm kubectl 
+    createrepo ./kubernetes.repo.rpms
+    tar --zstd -cf kubernetes.repo.rpms.tar.zst ./kubernetes.repo.rpms
 }
 
 function download_offlinecn(){
@@ -346,3 +362,12 @@ function get_kubeadm_join_cmd(){
 function install_workernode(){
     echo
 }
+
+
+#####################
+# functions main part
+#####################
+
+download_offline
+# rclone copy kubenetes.tar.zst webdav:Src/k8s/
+# rclone copy kubernetes.repo.rpms.tar.zst webdav:Src/k8s/
