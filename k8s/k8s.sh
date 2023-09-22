@@ -166,8 +166,8 @@ function get_os(){
 
 
 function help_message() {
-    echo <<EOF
-    sealos is a Kubernetes distribution, a unified OS to manage cloud native applications.
+    cat <<EOF
+    Deploy local k8s cluster via kubeadm.
 
     Cluster Management Commands:
     apply         Run cloud images within a kubernetes cluster with Clusterfile
@@ -188,6 +188,8 @@ function help_message() {
     registry      registry related
 
     Container and Image Commands:
+    download      Download kubefile and container images
+    downloadcn    Download kubefile and container images on China
     build         Build an image using instructions in a Containerfile or Kubefile
     create        Create a cluster without running the CMD, for inspecting image
     diff          Inspect changes to the object's file systems
@@ -227,8 +229,10 @@ function download_docker_image(){
     install_soft jq
     install_soft wget
     install_soft curl
-    wget https://raw.githubusercontent.com/moby/moby/master/contrib/download-frozen-image-v2.sh
-    # bash download-frozen-image-v2.sh $folder $image:$tag
+    folder=$1
+    image=$2
+    [ -s download-frozen-image-v2.sh ] || wget https://raw.githubusercontent.com/moby/moby/master/contrib/download-frozen-image-v2.sh
+    bash download-frozen-image-v2.sh "$folder" "$image"
 }
 
 
@@ -249,10 +253,8 @@ function download_containerd(){
 
 function download_calico(){
     calico_ver=$(get_github_latest_release "projectcalico/calico")
-	# wget -c  https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/tigera-operator.yaml
-	# wget -c  https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/custom-resources.yaml
-    wget -O calico.${calico_ver}.yaml https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/calico.yaml
-	wget -O calicoctl-linux-amd64.${calico_ver} https://github.com/projectcalico/calico/releases/download/${calico_ver}/calicoctl-linux-amd64
+    wget -c https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/calico.yaml
+	# wget -O calicoctl-linux-amd64.${calico_ver} https://github.com/projectcalico/calico/releases/download/${calico_ver}/calicoctl-linux-amd64
 }
 
 function download_cni(){
@@ -265,6 +267,12 @@ function download_helm(){
     # helm
     helm_ver=$(get_github_latest_release helm/helm)
     wget -c https://get.helm.sh/helm-${helm_ver}-linux-amd64.tar.gz
+}
+
+function download_kubeadm(){
+    # k8s
+    k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+    wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/kubeadm"
 }
 
 function download_k8s(){
@@ -285,8 +293,32 @@ function download_k8s(){
 #####################
 
 # temp folder
-trap 'rm -f "$TMPFILE"' EXIT
-TMPFILE=$(mktemp -d) || exit 1
-cd $TMPFILE
-
-cd -
+# trap 'rm -rf "$TMPFILE"' EXIT
+# TMPFILE=$(mktemp -d) || exit 1
+# cd $TMPFILE
+download_kubeadm
+chmod a+x kubeadm
+k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+k8s_ver=${k8s_ver/v/}
+./kubeadm config print init-defaults --component-configs KubeletConfiguration | sudo tee kubeadm.yml
+# kubernetesVersion: 1.28.0
+sudo sed -i "/kubernetesVersion:/ckubernetesVersion: ${k8s_ver}"  kubeadm.yml
+# ./kubeadm config images list --config kubeadm.yml | sed 's/^/ctr image pull /g'
+./kubeadm config images pull --v=5 --config kubeadm.yml
+# curl -Ls "https://sbom.k8s.io/$(curl -Ls https://dl.k8s.io/release/stable.txt)/release" | grep "SPDXID: SPDXRef-Package-registry.k8s.io" |  grep -v sha256 | cut -d- -f3- | sed 's/-/\//' | sed 's/-v1/:v1/' | grep amd64
+for i in $(./kubeadm config images list --config kubeadm.yml)
+do
+   ctr -n k8s.io images export $(echo ${i/registry.k8s.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
+done
+# calico images
+download_calico
+for i in $(grep 'image:' calico.yaml | awk '{print $2}')
+do
+    ctr -n k8s.io images pull $i
+    ctr -n k8s.io images export $(echo ${i/docker.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64 
+done
+# yum install -y zstd
+tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
+# clean 
+rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
+# cd -
