@@ -243,20 +243,20 @@ function download_containerd() {
     [ ! -s "${download_filename}" ] && wget -c "https://github.com/containerd/containerd/releases/download/v${containerd_ver}/${download_filename}"
     # download runc
     runc_ver=$(get_github_latest_release opencontainers/runc)
-    wget -c https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64 -O runc.amd64.${runc_ver}
+    wget -c https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64
 }
 
 function download_calico() {
     calico_ver=$(get_github_latest_release "projectcalico/calico")
-    wget -c https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/calico.yaml
+    wget -c "https://raw.githubusercontent.com/projectcalico/calico/${calico_ver}/manifests/calico.yaml"
     # wget -O calicoctl-linux-amd64.${calico_ver} https://github.com/projectcalico/calico/releases/download/${calico_ver}/calicoctl-linux-amd64
 }
 
-function download_cni() {
-    # cni
-    CNI_VER=$(get_github_latest_release "containernetworking/plugins")
-    [ ! -s "cni-plugins-linux-amd64-${CNI_VER}.tgz" ] && wget -c https://github.com/containernetworking/plugins/releases/download/${CNI_VER}/cni-plugins-linux-amd64-${CNI_VER}.tgz
-}
+# function download_cni() {
+#     # cni
+#     CNI_VER=$(get_github_latest_release "containernetworking/plugins")
+#     [ ! -s "cni-plugins-linux-amd64-${CNI_VER}.tgz" ] && wget -c "https://github.com/containernetworking/plugins/releases/download/${CNI_VER}/cni-plugins-linux-amd64-${CNI_VER}.tgz"
+# }
 
 function download_helm() {
     # helm
@@ -270,17 +270,17 @@ function download_kubeadm() {
     wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/kubeadm"
 }
 
-function download_k8s() {
-    # k8s
-    k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-    wget -c https://dl.k8s.io/${k8s_ver}/kubernetes-server-linux-amd64.tar.gz
-    # download from # https://www.downloadkubernetes.com/
-    # for pkg in {apiextensions-apiserver,kube-{aggregator,apiserver,controller-manager,log-runner,proxy,scheduler},kubeadm,kubectl,kubectl-convert,kubelet,mounter}
-    for pkg in {kubeadm,kubectl,kubelet}; do
-        wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/${pkg}"
-        # wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/${pkg}.sha256"
-    done
-}
+# function download_k8s() {
+#     # k8s
+#     k8s_ver=$(curl https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+#     wget -c https://dl.k8s.io/${k8s_ver}/kubernetes-server-linux-amd64.tar.gz
+#     # download from # https://www.downloadkubernetes.com/
+#     # for pkg in {apiextensions-apiserver,kube-{aggregator,apiserver,controller-manager,log-runner,proxy,scheduler},kubeadm,kubectl,kubectl-convert,kubelet,mounter}
+#     for pkg in {kubeadm,kubectl,kubelet}; do
+#         wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/${pkg}"
+#         # wget -c "https://dl.k8s.io/${k8s_ver}/bin/linux/amd64/${pkg}.sha256"
+#     done
+# }
 
 #####################
 # functions download part
@@ -292,7 +292,8 @@ function download_k8s() {
 # TMPFILE=$(mktemp -d) || exit 1
 # cd $TMPFILE
 
-function download_offline() {
+function download_k8simages() {
+    echo
     # download from registry.k8s.io
     download_kubeadm
     chmod a+x kubeadm
@@ -307,19 +308,21 @@ function download_offline() {
     for i in $(./kubeadm config images list --config kubeadm.yml); do
         ctr -n k8s.io images export $(echo ${i/registry.k8s.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64
     done
+}
+
+function download_calicoimages() {
+    echo
+    download_calico
     # calico images
     download_calico
     for i in $(grep 'image:' calico.yaml | awk '{print $2}'); do
         ctr -n k8s.io images pull $i
         ctr -n k8s.io images export $(echo ${i/docker.io\//}.tar | sed 's@/@+@g') "${i}" --platform linux/amd64
     done
-    # yum install -y zstd
-    pwd
-    # tar --zstd -cf kubenetes.tar.zst ./*.tar calico.yaml
-    # clean
-    # rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
-    # cd -
+}
 
+function download_k8srpms() {
+    echo
     # set k8s repo
     cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -333,8 +336,34 @@ EOF
     # download k8s repo rpms
     sudo yum install -y yum-download yum-plugin-downloadonly createrepo
     sudo yum install -y --downloadonly --disableexcludes=kubernetes --downloaddir=./kubernetes.repo.rpms kubelet kubeadm kubectl
-    createrepo ./kubernetes.repo.rpms
+    # createrepo ./kubernetes.repo.rpms
+}
+
+function download_offline() {
+    # yum install -y zstd
+    pwd
+
+    # containerd & runc
+    download_containerd
+    tar --zstd -cf containerd.tar.zst ./cri-containerd-cni-*-linux-amd64.tar.gz ./runc.amd64
+    rm -rf cri-containerd-cni-*-linux-amd64.tar.gz runc.amd64
+
+    download_calicoimages
+    tar --zstd -cf calico.tar.zst ./calico*.tar ./calico.yaml
+    rm -rf calico*.tar calico.yaml
+
+    download_k8simages
+    tar --zstd -cf kubenetes.tar.zst ./kube*.tar ./coredns*.tar ./etcd*.tar ./pause*.tar
+    rm -rf ./kube*.tar ./coredns*.tar ./etcd*.tar ./pause*.tar
+
+    download_k8srpms
     tar --zstd -cf kubernetes.repo.rpms.tar.zst ./kubernetes.repo.rpms
+    rm -rf ./kubernetes.repo.rpms
+
+    # clean
+    # rm -f ./*.tar calico.yaml kubeadm kubeadm.yml
+    # cd -
+
 }
 
 function download_offlinecn() {
@@ -361,13 +390,18 @@ function install_containerd() {
     sudo systemctl enable --now containerd.service
 }
 
+function install_k8srpms() {
+    echo
+    sudo tar -I zstd -xvf kubernetes.repo.rpms.tar.zst
+    sudo yum install -y ./kubernetes.repo.rpms/*.rpm
+}
+
 function install_controlplane() {
     echo
     sudo bash pre_install.sh
     install_containerd
+    install_k8srpms
     sudo tar -I zstd -xvf kubenetes.tar.zst
-    sudo tar -I zstd -xvf kubernetes.repo.rpms.tar.zst
-    sudo yum install -y ./kubernetes.repo.rpms/*.rpm
     #
     kubeadm config print init-defaults --component-configs KubeletConfiguration | sudo tee /etc/kubernetes/kubeadm.yml
     sudo sed -i "/name:/s/node/$(hostname)/" /etc/kubernetes/kubeadm.yml
@@ -405,10 +439,17 @@ function install_controlplane() {
 
 function get_kubeadm_join_cmd() {
     echo
+    local join_token=$(kubeadm token generate)
+    kubeadm token create "${join_token}" --print-join-command --ttl=240h0m0s # --ttl=0 # default 24h0m0s
+    unset token
 }
 
 function install_workernode() {
     echo
+    sudo bash pre_install.sh
+    install_containerd
+    install_k8srpms
+    # exec get_kubeadm_join_cmd
 }
 
 #####################
