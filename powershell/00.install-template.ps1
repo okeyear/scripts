@@ -1,23 +1,5 @@
-# check RunAsAdministrator
-if (!
-    # current role
-    (New-Object Security.Principal.WindowsPrincipal(
-        [Security.Principal.WindowsIdentity]::GetCurrent()
-    # is admin?
-    )).IsInRole(
-        [Security.Principal.WindowsBuiltInRole]::Administrator
-    )
-) {
-    # It is better than "#Requires -RunAsAdministrator"
-    # elevate script and exit current non-elevated runtime
-    Start-Process -FilePath 'powershell' -Verb RunAs `
-        -ArgumentList (
-            # flatten to single array
-            '-File', $MyInvocation.MyCommand.Source, $args `
-            | %{ $_ }
-        ) 
-    exit
-}
+#Requires -RunAsAdministrator
+
 
 # functions
 # get latest version via github API
