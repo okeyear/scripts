@@ -58,7 +58,7 @@ msiexec /i $outfile /quiet
 
 
 # windows PATH 
-# [environment]::SetEnvironmentvariable("Path", [environment]::GetEnvironmentvariable("Path", "User") + ";C:\Users\A76711715\bin\PortableGit", "User")
+# [environment]::SetEnvironmentvariable("Path", [environment]::GetEnvironmentvariable("Path", "User") + ";C:\Users\MyUser\bin\PortableGit", "User")
 # Set-ItemProperty -path HKCU:\Environment\ -Name Path -Value "$((Get-ItemProperty -path HKCU:\Environment\ -Name Path).Path);$HOME\bin"
 
 
