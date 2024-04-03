@@ -38,7 +38,7 @@ function set_bash_history(){
 
 function set_fail2ban(){ 
   # fail2ban
-  yum install epel-release
+  yum install -y epel-release
   yum install -y fail2ban
 
   \cp -f /etc/fail2ban/jail.{conf,local}
