@@ -70,6 +70,7 @@ sed -i '/^http_port/s/3128/127.0.0.1:3128/' /etc/squid/squid.conf
 systemctl enable --now squid
 
 # socks5 proxy
+yum install -y gcc-c++
 danteVer=$(curl -sSLk  https://www.inet.no/dante/download.html | grep -o 'dante-[0-9.]\{,8\}tar.gz' | sort -u | tail -n 1)
 danteUrl="https://www.inet.no/dante/files/${danteVer}"
 cd /usr/local/src/
