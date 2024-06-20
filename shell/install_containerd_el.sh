@@ -3,6 +3,7 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en
 set -e
 
+GithubSpeedUp=${GithubSpeedUp:-'https://mirror.ghproxy.com/'}
 ##############################
 # Step 1: Installing containerd
 
@@ -25,7 +26,7 @@ export containerd_ver=$(get_github_latest_release containerd/containerd)
 # curl -SLO https://github.com/containerd/containerd/releases/download/$containerd_ver/containerd-${containerd_ver/v/}-linux-amd64.tar.gz
 containerd_ver=${containerd_ver/v/}
 
-wget -c "https://github.com/containerd/containerd/releases/download/v${containerd_ver}/cri-containerd-cni-${containerd_ver}-linux-amd64.tar.gz"
+wget -c "${GithubSpeedUp}https://github.com/containerd/containerd/releases/download/v${containerd_ver}/cri-containerd-cni-${containerd_ver}-linux-amd64.tar.gz"
 
 # unzip the containerd
 # sudo tar -C /usr/local -xf containerd-${containerd_ver/v/}-linux-amd64.tar.gz
@@ -34,7 +35,7 @@ sudo tar -xf cri-containerd-cni-${containerd_ver}-linux-amd64.tar.gz -C /
 # 包含的runc不好用, 还是需要下一步下载安装的runc; 已包含服务脚本
 # ls /opt/cni/bin
 runc_ver=$(get_github_latest_release opencontainers/runc)
-curl -SLO https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64
+curl -SLO ${GithubSpeedUp}https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 
 # systemd服务脚本
@@ -52,7 +53,7 @@ sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 ##############################
 # Step 2: Installing runc
 runc_ver=$(get_github_latest_release opencontainers/runc)
-curl -SLO https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64
+curl -SLO ${GithubSpeedUp}https://github.com/opencontainers/runc/releases/download/${runc_ver}/runc.amd64
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 
 ##############################
