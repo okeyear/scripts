@@ -81,7 +81,7 @@ sudo sysctl --system
 # Step 5: genaral config settings
 # create default config
 sudo mkdir /etc/containerd
-containerd config default | sudo tee /etc/containerd/config.toml
+/usr/local/bin/containerd config default | sudo tee /etc/containerd/config.toml
 
 # 主要改三个地方及镜像加速
 # root = "/var/lib/containerd"
