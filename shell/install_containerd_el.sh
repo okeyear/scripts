@@ -61,6 +61,10 @@ sudo install -m 755 runc.amd64 /usr/local/sbin/runc
 
 ##############################
 # Step 3: systemd cgroup driver
+# genaral config settings
+# create default config
+sudo mkdir /etc/containerd
+/usr/local/bin/containerd config default | sudo tee /etc/containerd/config.toml
 sudo sed -i.bak '/SystemdCgroup/s/false/true/' /etc/containerd/config.toml
 
 ##############################
@@ -83,8 +87,8 @@ sudo sysctl --system
 ##############################
 # Step 5: genaral config settings
 # create default config
-sudo mkdir /etc/containerd
-/usr/local/bin/containerd config default | sudo tee /etc/containerd/config.toml
+# sudo mkdir /etc/containerd
+# /usr/local/bin/containerd config default | sudo tee /etc/containerd/config.toml
 
 # 主要改三个地方及镜像加速
 # root = "/var/lib/containerd"
