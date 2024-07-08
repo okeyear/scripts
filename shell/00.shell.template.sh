@@ -7,7 +7,10 @@ echo 'export PATH=/usr/local/bin:$PATH' | sudo tee /etc/profile.d/localbin.sh
 # source /etc/profile.d/localbin.sh
 ###################
 
-script_path=$(dirname "$(readlink -f "$0")")
+# script_path=$(dirname "$(readlink -f "$0")")
+echo "[INFO] switch to script dir"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd ${SCRIPT_DIR}
 
 # 1. If User is root or sudo install
 # if [ $(id -u) -eq 0 ]; then
