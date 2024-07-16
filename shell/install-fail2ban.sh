@@ -12,45 +12,6 @@ echo "[INFO] switch to script dir"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd ${SCRIPT_DIR}
 
-# 1. If User is root or sudo install
-# if [ $(id -u) -eq 0 ]; then
-if [ "$EUID" -eq "0" ]; then
-    SUDO='sh -c'
-elif command -v sudo  &>/dev/null ; then
-    SUDO='sudo -E sh -c'
-elif command -v su  &>/dev/null ; then
-    SUDO='su -c'
-else
-    cat >&2 <<-'EOF'
-    echo Error: this installer needs the ability to run commands as root.
-    echo We are unable to find either "sudo" or "su" available to make this happen.
-EOF
-    exit 1
-fi
-
-# Usage: $SUDO yum install -y nc
-
-# 2. install wget curl tar 
-function install_soft() {
-    if command -v dnf > /dev/null; then
-      $SUDO dnf -q -y install "$1"
-    elif command -v yum > /dev/null; then
-      $SUDO yum -q -y install "$1"
-    elif command -v apt > /dev/null; then
-      $SUDO apt-get -qqy install "$1"
-    elif command -v zypper > /dev/null; then
-      $SUDO zypper -q -n install "$1"
-    elif command -v apk > /dev/null; then
-      $SUDO apk add -q "$1"
-      command -v gettext >/dev/null || {
-      $SUDO apk add -q gettext-dev python2
-    }
-    else
-      echo -e "[\033[31m ERROR \033[0m] Please install it first (请先安装) $1 "
-      exit 1
-    fi
-}
-
 function get_os(){
     # get OS major version, minor version, ID , relaserver
     # rpm -q --qf %{version} $(rpm -qf /etc/issue)
@@ -74,16 +35,16 @@ function get_os(){
     OSpatch="${OSpatch%%[-.]*}"
     # Package Manager:  yum / apt
     case $OS in 
-        centos|redhat|oracle|ol|rhel) PM='yum' ;;
-        debian|ubuntu) PM='apt' ;;
+        centos|redhat|oracle|ol|rhel|almalinux) PM='yum' ;;
+        debian|ubuntu) PM='DEBIAN_FRONTEND=noninteractive apt' ;;
         *) echo -e "\e[0;31mNot supported OS\e[0m, \e[0;32m${OS}\e[0m" ;;
     esac
     echo -e "\e[0;32mOS: $OS, OSver: $OSver, OSVer: $OSVer, OSmajor: $OSmajor\e[0m"
 }
 
 get_os
-[ "$ID" = "debian" ] && install_soft inetutils-syslogd
-install_soft fail2ban
+[ "$ID" = "debian" ] && $PM install -y inetutils-syslogd
+$PM install -yq fail2ban
 
 tee /etc/fail2ban/jail.local <<EOF
 [DEFAULT]
@@ -114,4 +75,5 @@ esac
 
 systemctl enable --now fail2ban.service
 systemctl restart fail2ban.service
+sleep 2
 fail2ban-client status sshd
