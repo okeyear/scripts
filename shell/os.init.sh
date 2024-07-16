@@ -36,24 +36,6 @@ function set_bash_history(){
 }
 
 
-function set_fail2ban(){ 
-  # fail2ban
-  yum install -y epel-release
-  yum install -y fail2ban
-
-  \cp -f /etc/fail2ban/jail.{conf,local}
-  sed -i '/^\[sshd\]$/aenabled  = true\nfilter   = sshd\naction   = iptables[name=SSH, port=ssh, protocol=tcp]\nbantime  = 48h\n' /etc/fail2ban/jail.local
-  sed -i '/^#ignoreip/cignoreip = 127.0.0.1/8 ::1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16' /etc/fail2ban/jail.local
-  # sshPort=$(sudo ss -tnlp | awk '/sshd/{gsub("0.0.0.0:",""); print $4}')
-  # if [ "${sshPort}x" != "x" -a "${sshPort}x" != "22x" ] ; then
-      sed -i "/port.*ssh/s/ssh/${sshPort}/" /etc/fail2ban/jail.local
-  # fi
-  [ "$ID" = "ubuntu" ] && sed -i 's/secure/auth.log/' /etc/fail2ban/jail.local
-  systemctl enable --now fail2ban.service
-  sleep 1
-  fail2ban-client status sshd
-}
-
 
 function set_git(){ 
   sudo yum install -yq git 2>/dev/null || sudo apt install -y git
@@ -152,7 +134,6 @@ function set_sshd(){
 #############
 # main
 set_bash_history
-set_fail2ban
 set_git
 set_npm
 set_pip
